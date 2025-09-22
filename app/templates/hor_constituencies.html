@@ -1,0 +1,1190 @@
+<!-- base.html -->
+{% extends "base.html" %}
+
+{% block title %} - {% endblock %}
+
+{% block css %}
+  <style>
+        #pageheader {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }    
+        #pageheader h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #pageheader .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .province {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .province-content {
+            border: 2px dotted #3498db;
+            border-radius: 12px;
+            padding: 1.5rem;
+            padding-top: 2.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            border: none;
+        }
+
+        .province-content.expanded {
+            max-height: 2000px;
+            opacity: 1;
+            border: 2px dotted #3498db;
+        }
+
+        .province-btn {
+            position: absolute;
+            /* position: relative; */
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 180px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .province-btn:hover {
+            background: #2980b9;
+            transform: translateX(-50%) scale(1.05);
+            /* transform: scale(1.05); */
+        }
+
+        .province-btn i {
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .province-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .districts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .districts-container.show {
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .district {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .district-content {
+            border: 2px dotted #27ae60;
+            border-radius: 10px;
+            padding: 1.2rem;
+            padding-top: 2.2rem;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+
+            max-height: 0;
+            opacity: 0;
+            border: none;
+            overflow: hidden;
+        }
+
+        .district-content.expanded {
+            max-height: 1000px;
+            opacity: 1;
+            border: 2px dotted #27ae60;
+        }
+
+        .district-btn {
+            /* position: relative; */
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(39, 174, 96, 0.3);
+            transition: all 0.3s ease;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 150px;
+            margin: 0 auto 0.5rem;
+        }
+
+        .district-btn:hover {
+            background: #219653;
+            transform: translateX(-50%) scale(1.05);
+            /* transform: scale(1.05); */
+        }
+
+        .district-btn i {
+            margin-left: 6px;
+            transition: transform 0.3s ease;
+        }
+
+        .district-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .constituencies-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+            padding-top: 0.5rem;
+        }
+
+        .constituencies-container.show {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .constituency-list {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+
+        .constituency-item {
+            padding: 0.7rem;
+            margin: 0.5rem 0;
+            background: rgba(236, 240, 241, 0.7);
+            border-left: 4px solid #e74c3c;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .constituency-item:hover {
+            background: rgba(236, 240, 241, 1);
+            transform: translateX(5px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .districts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            #pageheader h1 {
+                font-size: 2rem;
+            }
+            
+            .province-btn, .district-btn {
+                font-size: 0.9rem;
+                padding: 0.7rem 1.5rem;
+            }
+        }
+  </style>
+{% endblock %}
+{% block content %}
+    <header id ='pageheader'>
+        <h1>House of Representatives Election, {{year}}</h1>
+        <p class="subtitle">Pick a constituency to see FPTP Candidates</p>
+    </header>
+
+
+<div class="container">
+
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Koshi Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Taplejung<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/TAPLEJUNG_1/list">Taplejung-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Panchthar<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PANCHTHAR_1/list">Panchthar-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Illam<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ILLAM_1/list">Illam-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ILLAM_2/list">Illam-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Jhapa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JHAPA_1/list">Jhapa-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JHAPA_2/list">Jhapa-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JHAPA_3/list">Jhapa-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JHAPA_4/list">Jhapa-4</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JHAPA_5/list">Jhapa-5</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Sankhuwasabha<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SANKHUWASABHA_1/list">Sankhuwasabha-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Tehrathum<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/TEHRATHUM_1/list">Tehrathum-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bhojpur<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BHOJPUR_1/list">Bhojpur-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dhankuta<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHANKUTA_1/list">Dhankuta-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Morang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_1/list">Morang-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_2/list">Morang-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_3/list">Morang-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_4/list">Morang-4</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_5/list">Morang-5</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MORANG_6/list">Morang-6</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Sunsari<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SUNSARI_1/list">Sunsari-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SUNSARI_2/list">Sunsari-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SUNSARI_3/list">Sunsari-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SUNSARI_4/list">Sunsari-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Solukhumbu<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SOLUKHUMBU_1/list">Solukhumbu-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Khotang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KHOTANG_1/list">Khotang-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Okhaldhunga<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/OKHALDHUNGA_1/list">Okhaldhunga-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Udayapur<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/UDAYAPUR_1/list">Udayapur-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/UDAYAPUR_2/list">Udayapur-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Madhesh Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Saptari<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SAPTARI_1/list">Saptari-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SAPTARI_2/list">Saptari-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SAPTARI_3/list">Saptari-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SAPTARI_4/list">Saptari-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Siraha<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SIRAHA_1/list">Siraha-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SIRAHA_2/list">Siraha-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SIRAHA_3/list">Siraha-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SIRAHA_4/list">Siraha-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dhanusa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHANUSA_1/list">Dhanusa-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHANUSA_2/list">Dhanusa-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHANUSA_3/list">Dhanusa-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHANUSA_4/list">Dhanusa-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Mahottari<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAHOTTARI_1/list">Mahottari-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAHOTTARI_2/list">Mahottari-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAHOTTARI_3/list">Mahottari-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAHOTTARI_4/list">Mahottari-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Sarlahi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SARLAHI_1/list">Sarlahi-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SARLAHI_2/list">Sarlahi-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SARLAHI_3/list">Sarlahi-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SARLAHI_4/list">Sarlahi-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Rautahat<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RAUTAHAT_1/list">Rautahat-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RAUTAHAT_2/list">Rautahat-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RAUTAHAT_3/list">Rautahat-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RAUTAHAT_4/list">Rautahat-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bara<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARA_1/list">Bara-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARA_2/list">Bara-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARA_3/list">Bara-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARA_4/list">Bara-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Parsa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PARSA_1/list">Parsa-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PARSA_2/list">Parsa-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PARSA_3/list">Parsa-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PARSA_4/list">Parsa-4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Bagmati Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dolakha<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DOLAKHA_1/list">Dolakha-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Ramechhap<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RAMECHHAP_1/list">Ramechhap-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Sindhuli<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SINDHULI_1/list">Sindhuli-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SINDHULI_2/list">Sindhuli-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Rasuwa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RASUWA_1/list">Rasuwa-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dhading<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHADING_1/list">Dhading-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DHADING_2/list">Dhading-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Nuwakot<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NUWAKOT_1/list">Nuwakot-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NUWAKOT_2/list">Nuwakot-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kathmandu<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_1/list">Kathmandu-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_2/list">Kathmandu-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_3/list">Kathmandu-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_4/list">Kathmandu-4</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_5/list">Kathmandu-5</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_6/list">Kathmandu-6</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_7/list">Kathmandu-7</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_8/list">Kathmandu-8</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_9/list">Kathmandu-9</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KATHMANDU_10/list">Kathmandu-10</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bhaktapur<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BHAKTAPUR_1/list">Bhaktapur-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BHAKTAPUR_2/list">Bhaktapur-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Lalitpur<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/LALITPUR_1/list">Lalitpur-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/LALITPUR_2/list">Lalitpur-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/LALITPUR_3/list">Lalitpur-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kavrepalanchowk<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAVREPALANCHOWK_1/list">Kavrepalanchowk-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAVREPALANCHOWK_2/list">Kavrepalanchowk-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Sindhupalchowk<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SINDHUPALCHOWK_1/list">Sindhupalchowk-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SINDHUPALCHOWK_2/list">Sindhupalchowk-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Makwanpur<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAKWANPUR_1/list">Makwanpur-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MAKWANPUR_2/list">Makwanpur-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Chitwan<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/CHITWAN_1/list">Chitwan-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/CHITWAN_2/list">Chitwan-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/CHITWAN_3/list">Chitwan-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Gandaki Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Gorkha<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/GORKHA_1/list">Gorkha-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/GORKHA_2/list">Gorkha-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Manang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MANANG_1/list">Manang-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Lamjung<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/LAMJUNG_1/list">Lamjung-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kaski<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KASKI_1/list">Kaski-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KASKI_2/list">Kaski-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KASKI_3/list">Kaski-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Tanahun<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/TANAHUN_1/list">Tanahun-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/TANAHUN_2/list">Tanahun-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Syangja<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SYANGJA_1/list">Syangja-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SYANGJA_2/list">Syangja-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Nawalparasi Bardaghat Susta East<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NAWALPARASI_BARDAGHAT_SUSTA_EAST_1/list">Nawalparasi-Bardaghat-Susta-East-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NAWALPARASI_BARDAGHAT_SUSTA_EAST_2/list">Nawalparasi-Bardaghat-Susta-East-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Mustang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MUSTANG_1/list">Mustang-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Myagdi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MYAGDI_1/list">Myagdi-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Baglung<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BAGLUNG_1/list">Baglung-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BAGLUNG_2/list">Baglung-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Parbat<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PARBAT_1/list">Parbat-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Lumbini Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Gulmi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/GULMI_1/list">Gulmi-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/GULMI_2/list">Gulmi-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Palpa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PALPA_1/list">Palpa-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PALPA_2/list">Palpa-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Arghakhanchi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ARGHAKHANCHI_1/list">Arghakhanchi-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Nawalparasi Bardaghat Susta West<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NAWALPARASI_BARDAGHAT_SUSTA_WEST_1/list">Nawalparasi-Bardaghat-Susta-West-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/NAWALPARASI_BARDAGHAT_SUSTA_WEST_2/list">Nawalparasi-Bardaghat-Susta-West-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Rupandehi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RUPANDEHI_1/list">Rupandehi-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RUPANDEHI_2/list">Rupandehi-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RUPANDEHI_3/list">Rupandehi-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RUPANDEHI_4/list">Rupandehi-4</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/RUPANDEHI_5/list">Rupandehi-5</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kapilvastu<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAPILVASTU_1/list">Kapilvastu-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAPILVASTU_2/list">Kapilvastu-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAPILVASTU_3/list">Kapilvastu-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Eastern Rukum<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/EASTERN_RUKUM_1/list">Eastern-Rukum-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Rolpa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ROLPA_1/list">Rolpa-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Pyuthan<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/PYUTHAN_1/list">Pyuthan-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DANG_1/list">Dang-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DANG_2/list">Dang-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DANG_3/list">Dang-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Banke<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BANKE_1/list">Banke-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BANKE_2/list">Banke-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BANKE_3/list">Banke-3</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bardiya<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARDIYA_1/list">Bardiya-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BARDIYA_2/list">Bardiya-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Karnali Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Salyan<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SALYAN_1/list">Salyan-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dolpa<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DOLPA_1/list">Dolpa-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Mugu<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/MUGU_1/list">Mugu-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Jumla<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JUMLA_1/list">Jumla-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kalikot<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KALIKOT_1/list">Kalikot-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Humla<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/HUMLA_1/list">Humla-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Jajarkot<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/JAJARKOT_1/list">Jajarkot-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dailekh<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DAILEKH_1/list">Dailekh-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DAILEKH_2/list">Dailekh-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Surkhet<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SURKHET_1/list">Surkhet-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/SURKHET_2/list">Surkhet-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Western Rukum<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/WESTERN_RUKUM_1/list">Western-Rukum-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="province">
+    <button class="province-btn" onclick="toggleProvince(this)">Sudurpashchim Province<i class="fas fa-chevron-down"></i></button>
+
+    <div class="province-content">
+        <div class="districts-container">
+        
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bajura<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BAJURA_1/list">Bajura-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Achham<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ACHHAM_1/list">Achham-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/ACHHAM_2/list">Achham-2</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Bajhang<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BAJHANG_1/list">Bajhang-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Doti<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DOTI_1/list">Doti-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Kailali<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAILALI_1/list">Kailali-1</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAILALI_2/list">Kailali-2</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAILALI_3/list">Kailali-3</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAILALI_4/list">Kailali-4</a></li>
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/KAILALI_5/list">Kailali-5</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Darchula<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DARCHULA_1/list">Darchula-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Baitadi<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/BAITADI_1/list">Baitadi-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="district">
+                <button class="district-btn" onclick="toggleDistrict(this)">Dadeldhura<i class="fas fa-chevron-down"></i></button>
+                <div class="district-content">
+                    <div class="constituencies-container">
+                        <ul class="constituency-list">
+                            <li class="constituency-item"><a href="/hor/{{year}}/constituency/DADELDHURA_1/list">Dadeldhura-1</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+</div>
+    <script>
+        function toggleProvince(button) {
+            // Toggle button state
+            button.classList.toggle('expanded');
+
+            // Get the province content and districts container
+            const provinceContent = button.nextElementSibling;
+            const districtsContainer = provinceContent.querySelector('.districts-container');
+
+            // Toggle the expanded class for province content
+            provinceContent.classList.toggle('expanded');
+
+            // Toggle the districts container
+            districtsContainer.classList.toggle('show');
+
+            // If we're closing the province, close any open districts
+            if (!provinceContent.classList.contains('expanded')) {
+                const districtButtons = provinceContent.querySelectorAll('.district-btn');
+                districtButtons.forEach(btn => {
+                    if (btn.classList.contains('expanded')) {
+                        toggleDistrict(btn); // Close the district
+                    }
+                });
+            }
+        }
+        function toggleDistrict(button) {
+            // Toggle button state
+            button.classList.toggle('expanded');
+
+            // Get the district content and constituencies container
+            const districtContent = button.nextElementSibling;
+            const constituenciesContainer = districtContent.querySelector('.constituencies-container');
+
+            // Toggle the expanded class for district content
+            districtContent.classList.toggle('expanded');
+
+            // Toggle the constituencies container
+            constituenciesContainer.classList.toggle('show');
+        }
+    </script>
+    
+{% endblock %}

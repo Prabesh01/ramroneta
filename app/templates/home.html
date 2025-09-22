@@ -1,0 +1,123 @@
+<!-- base.html -->
+{% extends "base.html" %}
+
+{% block title %} - {% endblock %}
+
+{% block css %}
+  <style>
+    #pagecontent {
+      font-family: 'Arial', sans-serif;
+      background: #f0fdf4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 50px;
+      padding: 40px;
+      background: transparent;
+    }
+
+    .content {
+      flex: 1;
+    }
+
+    .content h1 {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      color: #111827;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      font-size: 16px;
+      color: #111;
+    }
+
+    .step img {
+      width: 40px;
+      height: 40px;
+      margin-right: 15px;
+    }
+
+    .step strong {
+      font-weight: bold;
+    }
+
+    /* CTA Button */
+    .cta-btn {
+      margin-top: 20px;
+      background: #6366f1;
+      color: #fff;
+      font-weight: bold;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s ease;
+    }
+
+    .cta-btn:hover {
+      background: #4f46e5;
+    }
+
+    /* Right column */
+    .image-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-container img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<main id='pagecontent'>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Left Text Content -->
+    <div class="content">
+      <h1>Get ready to vote</h1>
+
+      <div class="step">
+        <img src="/static/img/search.png" alt="candidates">
+        <span><strong>Explore</strong> candidate profiles</span>
+      </div>
+
+      <div class="step">
+        <img src="/static/img/x.png" alt="questions">
+        <span><strong>Kick</strong> out those assholes this election</span>
+      </div>
+
+      <div class="step">
+        <img src="/static/img/idea.png" alt="ballot">
+        <span><strong>Make</strong> informed decisions</span>
+      </div>
+
+      <a href="/hor/2026/" class="cta-btn">House of Representatives Election 2082</a>
+    </div>
+
+    <!-- Right Image -->
+    <div class="image-container">
+      <img src="/static/img/chai.jpg" alt="">
+    </div>
+  </div>
+</main>
+{% endblock %}

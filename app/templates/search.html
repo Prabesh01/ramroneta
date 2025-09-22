@@ -1,0 +1,21 @@
+<!-- base.html -->
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<main id='pagecontent'>
+    <div class='mw550 pad5'>
+
+	    <form method='GET' class='mar5'>
+		    <input class='fwi' name='q' value="" autofocus	placeholder="What would you like to find?"/>
+	    </form>
+
+	
+		<div style="color: #808080; padding: 5px 10px; font-style: italic;">
+            Type the name of a candidate, party, or electoral district.
+        </div>
+
+    </div>
+</main>
+{% endblock %}

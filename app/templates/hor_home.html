@@ -1,0 +1,153 @@
+<!-- base.html -->
+{% extends "base.html" %}
+
+{% block title %} - {% endblock %}
+
+{% block css %}
+  <style>
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: #1a4f8b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #0d3c6e;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: green;
+        }
+
+        .btn-secondary:hover {
+            background: #388e3c;
+        }
+
+        .btn-outline {
+            background: transparent;
+            background: #1a4f8b;
+        }
+
+        .btn-outline:hover {
+            background: #1976d2;
+            color: white;
+        }
+        .house-structure {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1a4f8b;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .structure-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .structure-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .structure-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .structure-card i {
+            font-size: 3rem;
+            color: #1a4f8b;
+            margin-bottom: 1rem;
+        }
+
+        .structure-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1a4f8b;
+        }
+
+        .structure-card p {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a4f8b;
+        }
+
+        .election-types {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+
+  </style>
+{% endblock %}
+{% block content %}
+    <section class="house-structure">
+        <div class="container">
+            <div class="section-title">
+                <h2>Election for House of Representatives, {{year}}</h2>
+                <p>275 members elected through two different systems</p>
+            </div>
+            <div class="structure-cards">
+                <div class="structure-card">
+                    <i class="fas fa-user"></i>
+                    <h3>First-Past-The-Post</h3>
+                    <p>165 members elected directly from respective constituencies</p>
+                    <div class="card-value">165</div>
+                </div>
+                <div class="structure-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Proportional Representation</h3>
+                    <p>Voters vote for political parties nation-wide. Based on the vote percentage, parties can choose their x number of politicians to go to the House.</p>
+                    <div class="card-value">110</div>
+                </div>
+                <div class="structure-card">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>Total Members</h3>
+                    <p>The complete House of Representatives</p>
+                    <div class="card-value">275</div>
+                </div>
+            </div>
+            <div class="election-types">
+                <a href="/hor/{{year}}/constituencies" class="btn btn-secondary">View FPTP Candidates</a>
+                <a href="/hor/{{year}}/parties" class="btn btn-outline">View PR Candidates</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
