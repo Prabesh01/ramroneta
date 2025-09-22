@@ -73,7 +73,13 @@ def mod_perm_check(request,obj):
     valid_username = False
     user_prefix = request.user.username.upper()
     for rep in reps:
-        if rep.hor_constituency.startswith(user_prefix) or rep.province_constituency.startswith(user_prefix):
+        if (
+            rep.hor_constituency
+            and rep.hor_constituency.startswith(user_prefix)
+        ) or (
+            rep.province_constituency
+            and rep.province_constituency.startswith(user_prefix)
+        ):
             valid_username = True
             break
 
@@ -131,8 +137,9 @@ class CaseAdmin(admin.ModelAdmin):
     # mods might change candidate id in network request to set case for unauthorized candidates
     # this code avoids that scenario.
     def save_model(self, request, obj, form, change):
-        if not mod_perm_check(request,obj):
-            raise ValidationError('You are not allowed to set case for that candidate')
+        if not request.user.is_superuser:
+            if not mod_perm_check(request,obj):
+                raise ValidationError('You are not allowed to set case for that candidate')
         super().save_model(request, obj, form, change)
 
 
@@ -164,8 +171,9 @@ class KartutAdmin(admin.ModelAdmin):
         return form
     
     def save_model(self, request, obj, form, change):
-        if not mod_perm_check(request,obj):
-            raise ValidationError('You are not allowed to set Kartut for that candidate')
+        if not request.user.is_superuser:
+            if not mod_perm_check(request,obj):
+                raise ValidationError('You are not allowed to set Kartut for that candidate')
 
         if not request.user.is_superuser:
             for field in form.changed_data:
@@ -209,6 +217,10 @@ class RepresentativeAdmin(admin.ModelAdmin):
         return super().formfield_for_choice_field(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
+        if request.user.is_superuser:
+            super().save_model(request, obj, form, change)
+            return
+
         user_prefix = request.user.username.upper()
 
         if obj.candidate.added_by != request.user: 
@@ -224,7 +236,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
         ) or (
             obj.province_constituency
             and obj.province_constituency.startswith(user_prefix)
-        ):        
+        ):
             super().save_model(request, obj, form, change)
         else: raise ValidationError('You are not allowed to set Representative of that constituency')
 
