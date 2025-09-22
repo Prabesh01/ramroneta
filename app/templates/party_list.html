@@ -136,6 +136,7 @@
 
 {% for party in parties %}
       <!-- Candidate 1 -->
+       <a href="{% url 'hor_pr_candidate_detail' year=year party=party.id candidate_id=1 %}" style="text-decoration: none; color: inherit;">
       <div class="page-card">
         <div class="page-card-left">
           <img src="/uploads/{{party.flag}}" alt="{{ party.name }}" class="avatar">
@@ -150,6 +151,7 @@
           </svg>
         </div>
       </div>
+    </a>
 {% endfor %}
       
     </div>
