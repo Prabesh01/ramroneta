@@ -4,9 +4,356 @@
 
 {% block css %}
   <style>
+    .layout {
+      display: flex;
+      max-width: 1200px;
+      margin: 20px auto;
+      gap: 20px;
+    }    
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: #f3f3f3;
+      padding: 20px;
+      border-radius: 4px;
+    }
 
+    .sidebar h3 {
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #444;
+    }
+
+    .sidebar h2 {
+      font-size: 18px;
+      margin: 4px 0 20px;
+    }
+
+    .candidate-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .candidate-list li {
+      margin-bottom: 10px;
+    }
+
+    .candidate-list a {
+      display: block;
+      padding: 10px;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .candidate-list .active {
+      background: #1d4ed8;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .candidate-list .active span {
+      display: block;
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    .candidate-list .liberal { color: #dc2626; }
+    .candidate-list .ndp { color: #d97706; }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+    }
+
+    .header img {
+      width: 250px;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .header-info {
+      background: #1d4ed8;
+      color: #fff;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .header-info h1 {
+      margin: 0 0 10px;
+    }
+
+    .header-info p {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .header-info a {
+      color: #fff;
+      border-bottom: 1px dotted #fff;
+      text-decoration: none;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .nav-tabs a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 4px;
+    }
+
+    .nav-tabs a.active {
+      border-bottom: 2px solid #fff;
+    }
+
+    /* Content body */
+    .content {
+      padding: 20px;
+    }
+
+    .content h3 {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    .content p {
+      line-height: 1.6;
+      font-size: 14px;
+      color: #444;
+    }
+
+    /* Share section */
+    .share {
+      margin: 20px;
+      padding: 20px;
+      border-top: 1px solid #ddd;
+    }
+
+    .share h4 {
+      margin: 0 0 15px;
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .share-buttons a {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .facebook { background: #3b82f6; }
+    .twitter { background: #1d9bf0; }
+    .email { background: #6b7280; }
+    .whatsapp { background: #22c55e; }
+
+    /* Stats Section */
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      flex: 1;
+      min-width: 220px;
+      background: #f3b5b5;
+      padding: 20px;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .stat-box img,
+    .stat-box svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+    }
+
+    .stat-box h2 {
+      margin: 5px 0;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .stat-box p {
+      font-size: 14px;
+      margin: 0;
+    }
   </style>
 {% endblock %}
 {% block content %}
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h3>FPTP Candidates in {{constituency|title}}</h3>
+      <h2>HoR Election, {{year}}</h2>
+      <ul class="candidate-list">
+        {% for c in candidates %}
+        <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_fptp_candidate_detail' year=year constituency=constituency candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
+        {% endfor %}
+      </ul>
+    </aside>
 
+    {% if target %}
+    <!-- Main -->
+    <main class="main">
+      <!-- Header -->
+      <div class="header">
+        <img src="/uploads/{{ target.candidate.image }}" alt="Candidate">
+        <div class="header-info">
+          <h1>{{ target.candidate.name }}</h1>
+          <p><strong>{% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}</strong> candidate for <a href="#">{{ target.hor_constituency|title }}</a></p>
+          <div class="nav-tabs">
+            <a href="#" class="active">About</a>
+            <a href="#">Promises</a>
+          </div>
+          <p style="padding-top:20px;">{{ target.candidate.bio }}</p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Cases -->
+        <h3>Cases</h3>
+        {% if not cases %}
+        <p>No criminal cases reported.</p>
+        {% else %}
+        <ul>
+        {% for case in cases %}
+          <li>{{ case.info }} [{{ case.court }}: {{ case.case_number }}]</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        <!-- Allegations -->
+        <h3>Allegations</h3>
+        {% if not kartuts.allegation %}
+        <p>No allegations recorded.</p>
+        {% else %}
+        <ul>
+        {% for kartut in kartuts.allegation %}
+          <li>{{ kartut.info }}
+            {% if kartut.source1 %}
+          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
+            {% endif %}
+            {% if kartut.source2 %}
+          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
+            {% endif %}
+            {% if kartut.source3 %}
+          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
+            {% endif %}
+            {% if kartut.source4 %}
+          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+        {% endif %}        
+
+
+        <!-- Good Works -->
+        <h3>Good Works</h3>
+        {% if not kartuts.goodwork %}
+        <p>No good works recorded.</p>
+        {% else %}
+        <ul>
+        {% for kartut in kartuts.goodwork %}
+          <li>{{ kartut.info }}
+            {% if kartut.source1 %}
+          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
+            {% endif %}
+            {% if kartut.source2 %}
+          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
+            {% endif %}
+            {% if kartut.source3 %}
+          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
+            {% endif %}
+            {% if kartut.source4 %}
+          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+        {% endif %}        
+
+
+        <!-- Bad Works -->
+        <h3>Bad Works</h3>
+        {% if not kartuts.badworks %}
+        <p>No bad works recorded.</p>
+        {% else %}
+        <ul>
+        {% for kartut in kartuts.badworks %}
+          <li>{{ kartut.info }}
+            {% if kartut.source1 %}
+          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
+            {% endif %}
+            {% if kartut.source2 %}
+          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
+            {% endif %}
+            {% if kartut.source3 %}
+          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
+            {% endif %}
+            {% if kartut.source4 %}
+          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+        {% endif %}        
+
+        <!-- Stats -->
+        <h3>Statistics</h3>
+        <div class="stats">
+          <div class="stat-box">
+            <img src="/static/img/handcuffs.png" alt="Criminal Cases">
+            <h2>{{ total_cases }}</h2>
+            <p>Criminal Cases</p>
+          </div>
+          <div class="stat-box">
+            <img src="/static/img/knife.png" alt="Serious Criminal Cases">
+            <h2>{% if 'serious' in case_counts %} {{ case_counts.serious }} {% else %} 0 {% endif %}</h2>
+            <p>Serious Criminal Cases</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share -->
+      <div class="share">
+        <h4>Share this profile</h4>
+        <div class="share-buttons">
+          <a href="#" class="facebook">F</a>
+          <a href="#" class="twitter">T</a>
+          <a href="#" class="email">@</a>
+          <a href="#" class="whatsapp">W</a>
+        </div>
+      </div>
+    </main>
+{% endif %}
+    </div>
 {% endblock %}
