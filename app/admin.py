@@ -1,8 +1,69 @@
 from django.contrib import admin
-from .models import Candidate, Case, Kartut, Representative, Party
+from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency
 from django.core.exceptions import ValidationError
 from django import forms
 from django.db.models import Q
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User, Group
+
+class UserAdmin(BaseUserAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(username=request.user.username)
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser: return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser: return True
+        return False
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if not request.user.is_superuser:
+            for field_name, field in form.base_fields.items():
+                if field_name not in ['password']:
+                    field.widget = forms.HiddenInput()
+                    field.required = False
+        return form
+    
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser:
+            for field in form.changed_data:
+                if field not in ['password']:
+                    raise ValidationError('You are not allowed to change these fields')
+
+        return super().save_model(request, obj, form, change)    
+
+    # def has_change_permission(self, request, obj=None):
+    #     return True
+
+class GroupAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        if request.user.is_superuser: return True
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user.is_superuser: return True
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+admin.site.unregister(Group)
+admin.site.register(Group, GroupAdmin)        
 
 def mod_perm_check(request,obj):
     reps = Representative.objects.filter(candidate=obj.candidate)
@@ -10,8 +71,9 @@ def mod_perm_check(request,obj):
         return False
     
     valid_username = False
+    user_prefix = request.user.username.upper()
     for rep in reps:
-        if rep.hor_constituency.startswith(request.user.username) or rep.province_constituency.startswith(request.user.username):
+        if rep.hor_constituency.startswith(user_prefix) or rep.province_constituency.startswith(user_prefix):
             valid_username = True
             break
 
@@ -35,10 +97,11 @@ class CandidateAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
+        user_prefix = request.user.username.upper()
         return qs.filter(
             Q(added_by=request.user) |
-            Q(representative__hor_constituency__startswith=request.user.username) |
-            Q(representative__province_constituency__startswith=request.user.username)
+            Q(representative__hor_constituency__startswith=user_prefix) |
+            Q(representative__province_constituency__startswith=user_prefix)
         ).distinct()
 
     # since added_by is non-editable field, it shall be set here.
@@ -58,9 +121,10 @@ class CaseAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
+        user_prefix = request.user.username.upper()
         return qs.filter(
-            Q(candidate__representative__hor_constituency__startswith=request.user.username) |
-            Q(candidate__representative__province_constituency__startswith=request.user.username)
+            Q(candidate__representative__hor_constituency__startswith=user_prefix) |
+            Q(candidate__representative__province_constituency__startswith=user_prefix)
         ).distinct()
 
     # even if unauthorised candidates arent displayed in dropdown,
@@ -84,9 +148,10 @@ class KartutAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
+        user_prefix = request.user.username.upper()
         return qs.filter(
-            Q(candidate__representative__hor_constituency__startswith=request.user.username) |
-            Q(candidate__representative__province_constituency__startswith=request.user.username)
+            Q(candidate__representative__hor_constituency__startswith=user_prefix) |
+            Q(candidate__representative__province_constituency__startswith=user_prefix)
         ).distinct()
 
     # hide party field.
@@ -121,15 +186,45 @@ class RepresentativeAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
+        user_prefix = request.user.username.upper()
         return qs.filter(
-            Q(candidate__representative__hor_constituency__startswith=request.user.username) |
-            Q(candidate__representative__province_constituency__startswith=request.user.username)
+            Q(candidate__representative__hor_constituency__startswith=user_prefix) |
+            Q(candidate__representative__province_constituency__startswith=user_prefix)
         ).distinct()
 
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """
+        Limit constituency choices depending on the user's username
+        """
+        if not request.user.is_superuser:
+            user_prefix = request.user.username.upper()
+            if db_field.name == "hor_constituency":
+                kwargs['choices'] = [(None, '---')] + [
+                    c for c in HoR_Constituency.choices if c[0].startswith(user_prefix)
+                ]
+            elif db_field.name == "province_constituency":
+                kwargs['choices'] = [(None, '---')] + [
+                    c for c in Province_Constituency.choices if c[0].startswith(user_prefix)
+                ]
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+
     def save_model(self, request, obj, form, change):
-        if not obj.candidate.added_by != request.user: 
+        user_prefix = request.user.username.upper()
+
+        if obj.candidate.added_by != request.user: 
             raise ValidationError('You are not allowed to set Representative for that candidate')
-        if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
+        # if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
+        if not obj.hor_constituency and not obj.province_constituency:
+            raise ValidationError('Must choose one constituency')
+        if obj.hor_constituency and obj.province_constituency:
+            raise ValidationError('Choose only one constituency')
+        if (
+            obj.hor_constituency
+            and obj.hor_constituency.startswith(user_prefix)
+        ) or (
+            obj.province_constituency
+            and obj.province_constituency.startswith(user_prefix)
+        ):        
             super().save_model(request, obj, form, change)
         else: raise ValidationError('You are not allowed to set Representative of that constituency')
 
@@ -137,6 +232,18 @@ class RepresentativeAdmin(admin.ModelAdmin):
 class PartyAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser: return True
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_superuser: return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser: return True        
+        return False   
 
 admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(Case, CaseAdmin)

@@ -1,13 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
+from .validators import get_candidate_image_path, get_flag_image_path, image_validate
+
+ALLOWED_IMAGE_EXTENSIONS=['jpg', 'png', 'jpeg', 'webp','svg']
 
 class Candidate(models.Model):
 
     name = models.CharField(max_length=255)
     bio = models.TextField()
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, editable=False, null=True, blank=True)
-    # image = models.ImageField(upload_to='candidates/', null=True, blank=True)
-    # remove image file on update or clear.
+    image = models.ImageField(upload_to=get_candidate_image_path, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), image_validate])
 
     def __str__(self):
         return self.name
@@ -15,7 +18,7 @@ class Candidate(models.Model):
 class Party(models.Model):
     name = models.CharField(max_length=100, unique=True)
     info = models.TextField(blank=True, null=True)
-    # flag: image
+    flag = models.ImageField(upload_to=get_flag_image_path, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), image_validate])
 
     def __str__(self):
         return self.name
@@ -665,11 +668,12 @@ class ElectionYears(models.IntegerChoices):
 class Representative(models.Model):
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     house = models.CharField(max_length=30, choices=House.choices)
-    hor_constituency = models.CharField(max_length=50, choices=HoR_Constituency.choices)
+    hor_constituency = models.CharField(max_length=50, choices=HoR_Constituency.choices, blank=True, null=True)
     province_constituency = models.CharField(max_length=50, choices=Province_Constituency.choices, blank=True, null=True)
-    party = models.ForeignKey(Party, on_delete=models.CASCADE,null=True,blank=True)
     year = models.IntegerField(choices=ElectionYears.choices)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE,null=True,blank=True)
+    proportional = models.BooleanField(default=False)
     winner = models.BooleanField(default=False)
     order = models.IntegerField(blank=True,null=True)
     promise = models.TextField(blank=True, null=True)
-    # symbol: image file
+    symbol = models.ImageField(upload_to=get_flag_image_path, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), image_validate])
