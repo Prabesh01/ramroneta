@@ -227,7 +227,7 @@
       <div class="header">
         <img src="/uploads/{{ target.candidate.image }}" alt="Candidate">
         <div class="header-info">
-          <h1>{{ target.candidate.name }}</h1>
+          <h1>{{ target.candidate.name }} <span style="color:#023020">{% if target.winner %} (Winner){% endif %} </span></h1>
           <p><strong>{% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}</strong> candidate for <a href="#">{{ target.hor_constituency|title }}</a></p>
           <div class="nav-tabs">
             <a href="#" class="active">About</a>
