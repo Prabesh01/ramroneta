@@ -113,7 +113,17 @@
             margin-top: 2rem;
         }
 
-
+#more{
+    display: none;
+}
+#myBtn{
+    outline: none;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    text-transform: lowercase;
+    color: blue;
+}
   </style>
 {% endblock %}
 {% block content %}
@@ -133,7 +143,10 @@
                 <div class="structure-card">
                     <i class="fas fa-users"></i>
                     <h3>Proportional Representation</h3>
-                    <p>Voters vote for political parties nation-wide. Based on the vote percentage, parties can choose their x number of politicians to go to the House.</p>
+                    <p>Voters vote for political parties nation-wide. Based on the vote percentage they receive, parties can choose their x number of politicians<span id="dots">...</span>  
+                    <span id="more">
+                    to go to the House. <br><br>These PR candidates are from the minority communities (आदिवासी जनजाति, थारू, दलित, मधेशी, मुस्लिम, पिछडिएको क्षेत्र). This ensures the representation of marginalized and underrepresented groups and avoids the government to be in favor of majority groups based on caste, religion or ethnicity.<br><br>However, this provision has been misused by political parties. People from the business community were chosen under the Madhesi category. Picking already powerful and well-established people defeats the very purpose of the system.
+                    </span><button  onclick="readMore()" id="myBtn">Read more</button> 
                     <div class="card-value">110</div>
                 </div>
                 <div class="structure-card">
@@ -149,4 +162,21 @@
             </div>
         </div>
     </section>
+<script>
+function readMore(){
+     var dots = document.getElementById('dots');
+     var readMore = document.getElementById('more');
+     var openBtn = document.getElementById('myBtn');
+
+     if(dots.style.display === 'none') {
+        dots.style.display = 'inline';
+        openBtn.innerHTML = 'Read More';
+        readMore.style.display = 'none';
+    } else{
+        dots.style.display = 'none';
+        openBtn.innerHTML = 'see less';
+        readMore.style.display = 'inline';    
+    }
+}    
+</script>
 {% endblock %}
