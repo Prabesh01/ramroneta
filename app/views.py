@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Candidate, Case, Kartut, Party,  Representative
 from django.db.models import Count
 from collections import defaultdict
@@ -39,6 +39,9 @@ def hor_fptp_candidate_detail(request, year, constituency, candidate_id):
         kartuts = dict(kartuts)
 
     except Representative.DoesNotExist:
+        if fptp_candidates.exists():
+            target = fptp_candidates.first()
+            return redirect('hor_fptp_candidate_detail', year=year, constituency=constituency, candidate_id=target.candidate.id)
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
     return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': fptp_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count})
