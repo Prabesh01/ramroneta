@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from .validators import get_candidate_image_path, get_flag_image_path, image_validate
+from django.core.exceptions import ValidationError
 
 ALLOWED_IMAGE_EXTENSIONS=['jpg', 'png', 'jpeg', 'webp','svg']
 
@@ -677,3 +678,29 @@ class Representative(models.Model):
     order = models.IntegerField(blank=True,null=True)
     promise = models.TextField(blank=True, null=True)
     symbol = models.ImageField(upload_to=get_flag_image_path, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), image_validate])
+
+    # disallow: different candidate but same name, and other details.
+    def clean(self):
+        if self.house == House.HOUSE_OF_REPRESENTATIVES and (not self.hor_constituency and not self.proportional):
+            raise ValidationError({'hor_constituency': 'Either hor_constituency or proportional field is required for House of Representatives.'})
+        if self.house == House.PROVINCE_ASSEMBLY and (not self.province_constituency and not self.proportional):
+            raise ValidationError({'province_constituency': 'Either province_constituency or proportional field is required for Province Assembly.'})
+
+        existing_representatives = Representative.objects.filter(
+            # check candidate name
+            candidate__name=self.candidate.name,
+            house=self.house,
+            hor_constituency=self.hor_constituency,
+            province_constituency=self.province_constituency,
+            year=self.year,
+            party=self.party,
+            proportional=self.proportional
+        )
+        if self.pk:
+            existing_representatives = existing_representatives.exclude(pk=self.pk)
+        if existing_representatives.exists():
+            raise ValidationError('A representative with the same candidate name, house, constituency, year, party and proportionality already exists.')
+
+    # disallow: same candidate, same year, exists: hor,pc,proportional
+    class Meta:
+        unique_together = ('candidate', 'house', 'hor_constituency', 'province_constituency', 'year', 'proportional')
