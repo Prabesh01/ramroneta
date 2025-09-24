@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Voter Information Platform</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        /* Mission Section */
+        .mission-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin: 25px 0;
+        }
+        
+        .features-list li {
+            padding: 10px 0 10px 35px;
+            position: relative;
+            font-size: 1.1rem;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Contributors Section */
+        .contributors-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contributors-count {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .contributors-label {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        /* Future Vision Section */
+        .vision-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .vision-highlight {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        
+        /* Join Form Section */
+        .join-form {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1e3c72;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Data Safety Section */
+        .safety-note {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .content-section {
+                padding: 25px;
+            }
+            
+            .contributors-count {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <h1>About Our Voter Information Platform</h1>
+            <p>Empowering voters with transparent candidate information for informed democratic decisions</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Mission Section -->
+        <section class="content-section">
+            <h2 class="section-title">Our Mission</h2>
+            <p class="mission-text">
+                We are a group of independent researchers from different districts across the nation, aiming to provide voters with information about their candidates so that they can make informed decisions.
+            </p>
+            
+            <h3>Use this platform to:</h3>
+            <ul class="features-list">
+                <li>Know who is competing in this election from your locality and whether they deserve your vote or not.</li>
+                <li>Know what kind of candidates the parties have chosen as their representatives and whether you should cast vote on their flag or not.</li>
+            </ul>
+            
+            <p class="mission-text">
+                We believe, if voters are informed about candidate's background and history, the act of voting blindly based on who's more popular or voting the party that parents or even the whole village supports will be heavily minimized. Whom we vote determines how our country and our future will be shaped. Let's elect the good and capable candidate. Do not waste your vote on assholes who are not worthy of it.
+            </p>
+        </section>
+        
+        <!-- Contributors Section -->
+        <section class="content-section">
+            <h2 class="section-title">Our Growing Community</h2>
+            <div class="contributors-box">
+                <div class="contributors-count">1,247</div>
+                <div class="contributors-label">Active Contributors</div>
+            </div>
+            
+            <p class="vision-text">
+                With this amount of dispersion, variety and reach of capable minds spread across the nation, this group can do much more. Working as a news media providing local updates, collaboratively engage in social services as an organization, perform strong operations, plan protests for wrong deeds across the nation or even form a party.
+            </p>
+            
+            <p class="vision-highlight">
+                The possibilities are countless. And we will be doing what's necessary.
+            </p>
+            
+            <p class="vision-text">
+                If you are interested and can contribute by adding candidate details, join us now!
+            </p>
+        </section>
+        
+        <!-- Join Form Section -->
+        <section class="content-section">
+            <h2 class="section-title">Join Our Movement</h2>
+            <p>You will receive credentials for admin panel enabling you to add either candidates for your district only or add party representative of a specific party only.</p>
+            
+            <div class="join-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" class="form-control" placeholder="Enter your district">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Why do you want to join?</label>
+                    <textarea id="message" class="form-control" rows="4" placeholder="Tell us about your motivation to contribute"></textarea>
+                </div>
+                
+                <button class="btn">Join Us Now</button>
+            </div>
+            
+            <div class="safety-note">
+                <strong>Data Safety:</strong> In addition to having regular backup of the database, the access of contributors is heavily restricted with limited scope of data they can perform actions on.
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Voter Information Platform. All rights reserved.</p>
+            <p>Transparency in Democracy | Empowering Voters | Building Better Futures</p>
+        </div>
+    </footer>
+</body>
+</html>
