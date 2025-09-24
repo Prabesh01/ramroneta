@@ -667,10 +667,10 @@ class ElectionYears(models.IntegerChoices):
 
 class Representative(models.Model):
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
-    house = models.CharField(max_length=30, choices=House.choices)
+    house = models.CharField(max_length=30, choices=House.choices,default="HOUSE_OF_REPRESENTATIVES")
     hor_constituency = models.CharField(max_length=50, choices=HoR_Constituency.choices, blank=True, null=True)
     province_constituency = models.CharField(max_length=50, choices=Province_Constituency.choices, blank=True, null=True)
-    year = models.IntegerField(choices=ElectionYears.choices)
+    year = models.IntegerField(choices=ElectionYears.choices,default=2026)
     party = models.ForeignKey(Party, on_delete=models.CASCADE,null=True,blank=True)
     proportional = models.BooleanField(default=False)
     winner = models.BooleanField(default=False)
