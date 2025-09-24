@@ -66,22 +66,32 @@ admin.site.unregister(Group)
 admin.site.register(Group, GroupAdmin)        
 
 def mod_perm_check(request,obj):
+    if request.user.is_superuser: return True
+
     reps = Representative.objects.filter(candidate=obj.candidate)
     if not reps.exists(): 
         return False
-    
+
+    username = request.user.username
     valid_username = False
-    user_prefix = request.user.username.upper()
-    for rep in reps:
-        if (
-            rep.hor_constituency
-            and rep.hor_constituency.startswith(user_prefix)
-        ) or (
-            rep.province_constituency
-            and rep.province_constituency.startswith(user_prefix)
-        ):
-            valid_username = True
-            break
+    if username.startswith('pr-'):
+        party_code = int(username.split('-')[-1])
+        for rep in reps:
+            if rep.proportional and rep.party.id==party_code:
+                valid_username = True
+                break
+    else:
+        user_prefix = username.upper()
+        for rep in reps:
+            if (
+                rep.hor_constituency
+                and rep.hor_constituency.startswith(user_prefix)
+            ) or (
+                rep.province_constituency
+                and rep.province_constituency.startswith(user_prefix)
+            ):
+                valid_username = True
+                break
 
     if not valid_username:
         return False
@@ -103,7 +113,17 @@ class CandidateAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
-        user_prefix = request.user.username.upper()
+        username = request.user.username
+
+        if username.startswith('pr-'):
+            party_code = username.split('-')[-1] # extract party code from username
+            # filter the candidates added by user name starting with 'pr-' and ending with '-party_code'
+            return qs.filter(
+                Q(added_by__username__startswith='pr-') &
+                Q(added_by__username__endswith='-'+party_code)
+            )
+
+        user_prefix = username.upper()
         return qs.filter(
             Q(added_by=request.user) |
             Q(representative__hor_constituency__startswith=user_prefix) |
@@ -127,7 +147,16 @@ class CaseAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
-        user_prefix = request.user.username.upper()
+        username = request.user.username
+
+        if username.startswith('pr-'):
+            party_code = int(username.split('-')[-1])
+            return qs.filter(
+                Q(candidate__representative__party__id=party_code) &
+                Q(candidate__representative__proportional=True)
+            ).distinct()
+
+        user_prefix = username.upper()
         return qs.filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
             Q(candidate__representative__province_constituency__startswith=user_prefix)
@@ -137,9 +166,8 @@ class CaseAdmin(admin.ModelAdmin):
     # mods might change candidate id in network request to set case for unauthorized candidates
     # this code avoids that scenario.
     def save_model(self, request, obj, form, change):
-        if not request.user.is_superuser:
-            if not mod_perm_check(request,obj):
-                raise ValidationError('You are not allowed to set case for that candidate')
+        if not mod_perm_check(request,obj):
+            raise ValidationError('You are not allowed to set case for that candidate')
         super().save_model(request, obj, form, change)
 
 
@@ -155,7 +183,16 @@ class KartutAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
-        user_prefix = request.user.username.upper()
+        username = request.user.username
+
+        if username.startswith('pr-'):
+            party_code = int(username.split('-')[-1])
+            return qs.filter(
+                Q(candidate__representative__party__id=party_code) &
+                Q(candidate__representative__proportional=True)
+            ).distinct()
+
+        user_prefix = username.upper()
         return qs.filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
             Q(candidate__representative__province_constituency__startswith=user_prefix)
@@ -164,18 +201,22 @@ class KartutAdmin(admin.ModelAdmin):
     # hide party field.
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.username.startswith('pr-'):
             for field_name, field in form.base_fields.items():
                 if field_name in ['party']:
                     field.widget = forms.HiddenInput()
         return form
     
     def save_model(self, request, obj, form, change):
-        if not request.user.is_superuser:
-            if not mod_perm_check(request,obj):
-                raise ValidationError('You are not allowed to set Kartut for that candidate')
+        if not mod_perm_check(request,obj):
+            raise ValidationError('You are not allowed to set Kartut for that candidate')
 
-        if not request.user.is_superuser:
+        if request.user.username.startswith('pr-'):
+            party_code = int(request.user.username.split('-')[-1]) # extract party code from username
+            if obj.party and obj.party.id != party_code:
+                raise ValidationError('You are not allowed to set Kartut for that party')
+
+        elif not request.user.is_superuser:
             for field in form.changed_data:
                 if field in ['party']:
                     raise ValidationError('You are not allowed to change these fields')                 
@@ -194,7 +235,16 @@ class RepresentativeAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser: return qs
 
-        user_prefix = request.user.username.upper()
+        username = request.user.username
+
+        if username.startswith('pr-'):
+            party_code = username.split('-')[-1]
+            return qs.filter(
+                Q(party__id=party_code) &
+                Q(proportional=True)
+            )
+
+        user_prefix = username.upper()
         return qs.filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
             Q(candidate__representative__province_constituency__startswith=user_prefix)
@@ -204,7 +254,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
         """
         Limit constituency choices depending on the user's username
         """
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.username.startswith('pr-'):
             user_prefix = request.user.username.upper()
             if db_field.name == "hor_constituency":
                 kwargs['choices'] = [(None, '---')] + [
@@ -216,12 +266,55 @@ class RepresentativeAdmin(admin.ModelAdmin):
                 ]
         return super().formfield_for_choice_field(db_field, request, **kwargs)
 
+    # hide proportional and order field from mods, as they are for PR.
+    # hide hor_constituency and province_constituency from prmods as they are for FPTP.
+    # check proportional field by default. require order field.
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if request.user.username.startswith('pr-'):
+            for field_name, field in form.base_fields.items():
+                if field_name in ['hor_constituency','province_constituency']:
+                    field.widget = forms.HiddenInput()
+                if field_name == 'proportional':
+                    field.initial = True
+                    field.disabled = True
+                if field_name in ['party','order']:
+                    field.required = True
+        elif not request.user.is_superuser:
+            for field_name, field in form.base_fields.items():
+                if field_name in ['proportional','order']:
+                    field.widget = forms.HiddenInput()
+        return form
+
+
     def save_model(self, request, obj, form, change):
         if request.user.is_superuser:
             super().save_model(request, obj, form, change)
             return
 
-        user_prefix = request.user.username.upper()
+        username = request.user.username
+
+        if username.startswith('pr-'):
+            party_code = int(username.split('-')[-1]) # extract party code from username
+            if not obj.party:
+                raise ValidationError('party field missing!')
+            if obj.party.id != party_code:
+                raise ValidationError('You are not allowed to set Representative for that party')
+            if obj.hor_constituency or obj.province_constituency:
+                raise ValidationError('You aren\'t supposed to set constituency candidates')
+            if not obj.order or not obj.party:
+                raise ValidationError('order field missing!')
+
+            super().save_model(request, obj, form, change)
+            return
+
+         # for FPTP mods, prevent changing proportional and order fields.
+
+        for field in form.changed_data:
+            if field in ['order','proportional']:
+                raise ValidationError('You are not allowed to change these fields')
+
+        user_prefix = username.upper()
 
         if obj.candidate.added_by != request.user: 
             raise ValidationError('You are not allowed to set Representative for that candidate')
@@ -244,6 +337,15 @@ class RepresentativeAdmin(admin.ModelAdmin):
 class PartyAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        username = request.user.username
+
+        if not username.startswith('pr-'): return qs
+        
+        party_code = username.split('-')[-1]
+        return qs.filter(id=party_code)
 
     def has_add_permission(self, request):
         if request.user.is_superuser: return True
