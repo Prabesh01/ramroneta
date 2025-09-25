@@ -289,11 +289,11 @@
 
         <!-- Bad Works -->
         <h3>Bad Works</h3>
-        {% if not kartuts.badworks %}
+        {% if not kartuts.badwork %}
         <p>No bad works recorded.</p>
         {% else %}
         <ul>
-        {% for kartut in kartuts.badworks %}
+        {% for kartut in kartuts.badwork %}
           <li>{{ kartut.info }}
             {% if kartut.source1 %}
           <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
