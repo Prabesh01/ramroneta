@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} - {% endblock %}
+{% block title %}{{ target.candidate.name }}: {% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}{% if target.proportional %} PR candidate: #{{target.order}} {%else%} candidate for {{ target.hor_constituency|title }}{% endif %}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
