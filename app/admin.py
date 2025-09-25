@@ -98,6 +98,24 @@ def mod_perm_check(request,obj):
 
     return True
 
+def mod_qs(qs,request):
+    if request.user.is_superuser: return qs
+
+    username = request.user.username
+
+    if username.startswith('pr-'):
+        party_code = int(username.split('-')[-1])
+        return qs.filter(
+            Q(candidate__representative__party__id=party_code) &
+            Q(candidate__representative__proportional=True)
+        ).distinct()
+
+    user_prefix = username.upper()
+    return qs.filter(
+        Q(candidate__representative__hor_constituency__startswith=user_prefix) |
+        Q(candidate__representative__province_constituency__startswith=user_prefix)
+    ).distinct()    
+
 class CandidateAdmin(admin.ModelAdmin):
     # display these columns
     list_display = ('name',)
@@ -118,10 +136,7 @@ class CandidateAdmin(admin.ModelAdmin):
         if username.startswith('pr-'):
             party_code = username.split('-')[-1] # extract party code from username
             # filter the candidates added by user name starting with 'pr-' and ending with '-party_code'
-            return qs.filter(
-                Q(added_by__username__startswith='pr-') &
-                Q(added_by__username__endswith='-'+party_code)
-            )
+            return qs.filter(added_by__username__endswith='-'+party_code)
 
         user_prefix = username.upper()
         return qs.filter(
@@ -145,22 +160,7 @@ class CaseAdmin(admin.ModelAdmin):
     # get_queryset: self constituency only.
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.is_superuser: return qs
-
-        username = request.user.username
-
-        if username.startswith('pr-'):
-            party_code = int(username.split('-')[-1])
-            return qs.filter(
-                Q(candidate__representative__party__id=party_code) &
-                Q(candidate__representative__proportional=True)
-            ).distinct()
-
-        user_prefix = username.upper()
-        return qs.filter(
-            Q(candidate__representative__hor_constituency__startswith=user_prefix) |
-            Q(candidate__representative__province_constituency__startswith=user_prefix)
-        ).distinct()
+        return mod_qs(qs, request)
 
     # even if unauthorised candidates arent displayed in dropdown,
     # mods might change candidate id in network request to set case for unauthorized candidates
@@ -181,22 +181,7 @@ class KartutAdmin(admin.ModelAdmin):
     # get_queryset: self constituency only.
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.is_superuser: return qs
-
-        username = request.user.username
-
-        if username.startswith('pr-'):
-            party_code = int(username.split('-')[-1])
-            return qs.filter(
-                Q(candidate__representative__party__id=party_code) &
-                Q(candidate__representative__proportional=True)
-            ).distinct()
-
-        user_prefix = username.upper()
-        return qs.filter(
-            Q(candidate__representative__hor_constituency__startswith=user_prefix) |
-            Q(candidate__representative__province_constituency__startswith=user_prefix)
-        ).distinct()
+        return mod_qs(qs, request)
 
     # hide party field.
     def get_form(self, request, obj=None, **kwargs):
@@ -302,7 +287,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
                 raise ValidationError('You are not allowed to set Representative for that party')
             if obj.hor_constituency or obj.province_constituency:
                 raise ValidationError('You aren\'t supposed to set constituency candidates')
-            if not obj.order or not obj.party:
+            if not obj.order:
                 raise ValidationError('order field missing!')
 
             super().save_model(request, obj, form, change)
@@ -316,7 +301,8 @@ class RepresentativeAdmin(admin.ModelAdmin):
 
         user_prefix = username.upper()
 
-        if obj.candidate.added_by != request.user: 
+        # if obj.candidate.added_by != request.user:
+        if not obj.candidate.added_by.username.upper().startswith(user_prefix) and not user_prefix.startswith(obj.candidate.added_by.username.upper()):
             raise ValidationError('You are not allowed to set Representative for that candidate')
         # if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
         if not obj.hor_constituency and not obj.province_constituency:
@@ -343,7 +329,7 @@ class PartyAdmin(admin.ModelAdmin):
         username = request.user.username
 
         if not username.startswith('pr-'): return qs
-        
+
         party_code = username.split('-')[-1]
         return qs.filter(id=party_code)
 
