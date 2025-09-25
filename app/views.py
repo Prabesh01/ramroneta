@@ -3,6 +3,7 @@ from .models import Candidate, Case, Kartut, Party,  Representative
 from django.db.models import Count
 from collections import defaultdict
 import requests
+from django.contrib.auth.models import User
 
 def home(request):
     return render(request, 'home.html')
@@ -12,7 +13,7 @@ def hor_home(request, year):
 
 def about(request):
     tq=False
-    user_count = Candidate.objects.count()
+    user_count = User.objects.count()
 
     if request.method == 'POST':
         message = "**myneta.np form submission:**\n"
