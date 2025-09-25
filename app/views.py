@@ -35,6 +35,9 @@ def hor_fptp_candidate_detail(request, year, constituency, candidate_id):
             'candidate', 'party'
         ).get(
             candidate__id=candidate_id,
+            year=year,
+            hor_constituency=constituency,
+            proportional=False
         )
         
         cases = Case.objects.filter(candidate=target.candidate).order_by('-date_filed')
