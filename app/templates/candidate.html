@@ -3,6 +3,7 @@
 {% block title %} - {% endblock %}
 
 {% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
     .layout {
       display: flex;
@@ -150,27 +151,6 @@
       margin: 0 0 15px;
     }
 
-    .share-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .share-buttons a {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .facebook { background: #3b82f6; }
-    .twitter { background: #1d9bf0; }
-    .email { background: #6b7280; }
-    .whatsapp { background: #22c55e; }
-
     /* Stats Section */
     .stats {
       display: flex;
@@ -204,19 +184,23 @@
     .stat-box p {
       font-size: 14px;
       margin: 0;
-    }
+    }    
   </style>
 {% endblock %}
 {% block content %}
   <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h3>FPTP Candidates in {{constituency|title}}</h3>
-      <h2>HoR Election, {{year}}</h2>
+      <h3>{{election_type}} Candidates in {{constituency|title}}</h3>
+      <h2>{{house}} Election, {{year}}</h2>
       <ul class="candidate-list">
         {% for c in candidates %}
-        <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_fptp_candidate_detail' year=year constituency=constituency candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
-        {% endfor %}
+        {% if target.proportional %}
+          <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_pr_candidate_detail' year=year party=target.party.id candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="liberal">●</span>{% endif %} {{ c.candidate.name }}<br><span>#{{c.order}}</span></a></li>
+        {% else %}
+          <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_fptp_candidate_detail' year=year constituency=constituency candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
+        {%endif%}
+          {% endfor %}
       </ul>
     </aside>
 
@@ -228,7 +212,7 @@
         <img src="/uploads/{{ target.candidate.image }}" alt="Candidate">
         <div class="header-info">
           <h1>{{ target.candidate.name }} <span style="color:#023020">{% if target.winner %} (Winner){% endif %} </span></h1>
-          <p><strong>{% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}</strong> candidate for <a href="#">{{ target.hor_constituency|title }}</a></p>
+          <p><strong>{% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}</strong>{% if target.proportional %} PR candidate: #{{target.order}} {%else%} candidate for <a href="#">{{ target.hor_constituency|title }}</a>{% endif %}</p>
           <div class="nav-tabs">
             <a href="#" class="active">About</a>
             <a href="#">Promises</a>
@@ -239,6 +223,7 @@
 
       <!-- Content -->
       <div class="content">
+        <b>Symbol: </b><br><img height="50" width="50" src="/uploads/{% if target.symbol %}{{ target.symbol }}{%else%}{{ target.party.flag }}{%endif%}" alt="Candidate">
         <!-- Cases -->
         <h3>Cases</h3>
         {% if not cases %}
@@ -346,12 +331,10 @@
       <!-- Share -->
       <div class="share">
         <h4>Share this profile</h4>
-        <div class="share-buttons">
-          <a href="#" class="facebook">F</a>
-          <a href="#" class="twitter">T</a>
-          <a href="#" class="email">@</a>
-          <a href="#" class="whatsapp">W</a>
-        </div>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" style="margin-right:10px;"><i class="fab fa-facebook fa-2x"></i></a>
+        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}{% if target.proportional %} PR candidate: #{{target.order}} {%else%} candidate for {{ target.hor_constituency|title }}{% endif %}" target="_blank" style="margin-right:10px;"><i class="fab fa-twitter fa-2x"></i></a>
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title=Candidate Profile: {{ target.candidate.name }}" target="_blank" style="margin-right:10px;"><i class="fab fa-linkedin fa-2x"></i></a>
+        <a href="mailto:?subject=Candidate Profile: {{ target.candidate.name }}&body=Check out this candidate profile: {{ request.build_absolute_uri }}" target="_blank" style="margin-right:10px;"><i class="fas fa-envelope fa-2x"></i></a>
       </div>
     </main>
 {% endif %}

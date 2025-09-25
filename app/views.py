@@ -59,16 +59,47 @@ def hor_fptp_candidate_detail(request, year, constituency, candidate_id):
             return redirect('hor_fptp_candidate_detail', year=year, constituency=constituency, candidate_id=target.candidate.id)
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
-    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': fptp_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count})
+    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': fptp_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'FPTP'})
+
+def hor_pr_candidate_detail(request, year, party, candidate_id):
+    pr_candidates = Representative.objects.filter(year=year, party__id=party, proportional=True)
+
+    try:
+        target = Representative.objects.select_related(
+            'candidate', 'party'
+        ).get(
+            candidate__id=candidate_id, year=year, party__id=party, proportional=True
+        )
+        
+        cases = Case.objects.filter(candidate=target.candidate).order_by('-date_filed')
+        case_counts = cases.values('case_type').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        case_counts = {
+            item['case_type']: item['count'] for item in case_counts
+        }        
+        total_cases = cases.count()
+        other_cases_count = total_cases - case_counts['serious'] if 'serious' in case_counts else total_cases
+
+        kartuts_list = Kartut.objects.filter(candidate=target.candidate).order_by('-kartuts_date')
+        kartuts = defaultdict(list)
+        for item in kartuts_list:
+            kartuts[item.kartut_type].append(item)
+        kartuts = dict(kartuts)
+
+    except Representative.DoesNotExist:
+        if pr_candidates.exists():
+            target = pr_candidates.first()
+            return redirect('hor_pr_candidate_detail', year=year, party=party, candidate_id=target.candidate.id)
+        target = cases = kartuts = case_counts = total_cases = other_cases_count = None
+
+    return render(request, 'candidate.html', {'year': year, 'constituency': target.party.name if target else '', 'candidates': pr_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'PR'})
 
 def hor_parties(request, year):
     parties = Party.objects.filter(
-        representative__year=year, # representative__proportional=True
+        representative__year=year, representative__proportional=True
     ).annotate(
         rep_count=Count('representative')
     ).distinct().order_by('-rep_count', 'name')
 
     return render(request, 'party_list.html', {'year': year, 'parties': parties})
-
-def hor_pr_candidate_detail(request, year, party, candidate_id):
-    pass
