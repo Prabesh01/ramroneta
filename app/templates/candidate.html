@@ -185,6 +185,85 @@
       font-size: 14px;
       margin: 0;
     }    
+
+    /* Source Modal Styles - Minimal additions */
+    .source-trigger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+      margin-left: 8px;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .source-trigger:hover {
+      background: #f0f0f0;
+    }
+
+    .source-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .source-modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .source-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .close-source-modal {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .sources-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .source-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .source-item:last-child {
+      border-bottom: none;
+    }
+
+    .source-link {
+      color: #1d4ed8;
+      text-decoration: none;
+    }
+
+    .source-link:hover {
+      text-decoration: underline;
+    }    
   </style>
 {% endblock %}
 {% block content %}
@@ -243,18 +322,13 @@
         <ul>
         {% for kartut in kartuts.allegation %}
           <li>{{ kartut.info }}
-            {% if kartut.source1 %}
-          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
-            {% endif %}
-            {% if kartut.source2 %}
-          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
-            {% endif %}
-            {% if kartut.source3 %}
-          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
-            {% endif %}
-            {% if kartut.source4 %}
-          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
-            {% endif %}
+            <button class="source-trigger" onclick="showSources(this)" 
+                    data-sources='[
+                      "{{ kartut.source1 }}", 
+                      "{{ kartut.source2 }}", 
+                      "{{ kartut.source3 }}", 
+                      "{{ kartut.source4 }}"
+                    ]' data-date="{{ kartut.kartuts_date|date:'F Y' }}">🔗</button>
           </li>
         {% endfor %}
         </ul>
@@ -269,18 +343,13 @@
         <ul>
         {% for kartut in kartuts.goodwork %}
           <li>{{ kartut.info }}
-            {% if kartut.source1 %}
-          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
-            {% endif %}
-            {% if kartut.source2 %}
-          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
-            {% endif %}
-            {% if kartut.source3 %}
-          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
-            {% endif %}
-            {% if kartut.source4 %}
-          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
-            {% endif %}
+            <button class="source-trigger" onclick="showSources(this)" 
+                    data-sources='[
+                      "{{ kartut.source1 }}", 
+                      "{{ kartut.source2 }}", 
+                      "{{ kartut.source3 }}", 
+                      "{{ kartut.source4 }}"
+                    ]' data-date="{{ kartut.kartuts_date|date:'F Y' }}">🔗</button>
           </li>
         {% endfor %}
         </ul>
@@ -295,18 +364,13 @@
         <ul>
         {% for kartut in kartuts.badwork %}
           <li>{{ kartut.info }}
-            {% if kartut.source1 %}
-          <a href="{{ kartut.source1 }}" target="_blank">[1] </a>
-            {% endif %}
-            {% if kartut.source2 %}
-          <a href="{{ kartut.source2 }}" target="_blank">[2] </a>
-            {% endif %}
-            {% if kartut.source3 %}
-          <a href="{{ kartut.source3 }}" target="_blank">[3] </a>
-            {% endif %}
-            {% if kartut.source4 %}
-          <a href="{{ kartut.source4 }}" target="_blank">[4] </a>
-            {% endif %}
+            <button class="source-trigger" onclick="showSources(this)" 
+                    data-sources='[
+                      "{{ kartut.source1 }}", 
+                      "{{ kartut.source2 }}", 
+                      "{{ kartut.source3 }}", 
+                      "{{ kartut.source4 }}"
+                    ]' data-date="{{ kartut.kartuts_date|date:'F Y' }}">🔗</button>
           </li>
         {% endfor %}
         </ul>
@@ -339,4 +403,79 @@
     </main>
 {% endif %}
     </div>
+      <!-- Source Modal -->
+  <div class="source-modal" id="sourceModal">
+    <div class="source-modal-content">
+      <div class="source-modal-header">
+        <h3 id="sourceModalTitle">Sources</h3>
+        <button class="close-source-modal" onclick="closeSourceModal()">×</button>
+      </div>
+      <ul class="sources-list" id="sourcesList">
+        <!-- Sources will be inserted here dynamically -->
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function extractHostname(url) {
+      try {
+        return new URL(url).hostname.replace('www.', '');
+      } catch (e) {
+        // If URL parsing fails, try to extract hostname manually
+        const match = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im);
+        return match ? match[1] : url;
+      }
+    }
+
+    function showSources(button) {
+      const modal = document.getElementById('sourceModal');
+      const sourcesList = document.getElementById('sourcesList');
+      const sourceModalTitle = document.getElementById('sourceModalTitle');
+      // Clear previous sources
+      sourcesList.innerHTML = '';
+      
+      // Get sources from data attribute
+      const sourcesJson = button.getAttribute('data-sources');
+      const date_str = button.getAttribute('data-date');
+        sourceModalTitle.textContent = `${date_str}`;
+      if (sourcesJson) {
+        try {
+          const sources = JSON.parse(sourcesJson);
+          if (sources.length > 0) {
+            sources.forEach((source, index) => {
+              if (source) {
+                if (source.trim() === 'None') return;
+                const li = document.createElement('li');
+                li.className = 'source-item';
+                const hostname = extractHostname(source);
+                li.innerHTML = `<a href="${source}" target="_blank" class="source-link">${hostname}</a>`;
+                sourcesList.appendChild(li);
+              }
+            });
+          } else {
+            sourcesList.innerHTML = '<li>No sources available</li>';
+          }
+        } catch (e) {
+          sourcesList.innerHTML = '<li>Error loading sources</li>';
+        }
+      } else {
+        sourcesList.innerHTML = '<li>No sources available</li>';
+      }
+      
+      // Show modal
+      modal.style.display = 'flex';
+    }
+
+    function closeSourceModal() {
+      document.getElementById('sourceModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside content
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('sourceModal');
+      if (event.target === modal) {
+        closeSourceModal();
+      }
+    });
+  </script>
 {% endblock %}
