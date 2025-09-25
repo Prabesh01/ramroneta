@@ -332,7 +332,7 @@
       <div class="share">
         <h4>Share this profile</h4>
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" style="margin-right:10px;"><i class="fab fa-facebook fa-2x"></i></a>
-        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}{% if target.proportional %} PR candidate: #{{target.order}} {%else%} candidate for {{ target.hor_constituency|title }}{% endif %}" target="_blank" style="margin-right:10px;"><i class="fab fa-twitter fa-2x"></i></a>
+        <a href="https://x.com/intent/post?url={{ request.build_absolute_uri }}&text={% if target.party.name %}{{ target.party.name }}{% else %} Independent {% endif %}{% if target.proportional %} PR candidate: #{{target.order}} {%else%} candidate for {{ target.hor_constituency|title }}{% endif %}:%0A" target="_blank" style="margin-right:10px;"><i class="fab fa-twitter fa-2x"></i></a>
         <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title=Candidate Profile: {{ target.candidate.name }}" target="_blank" style="margin-right:10px;"><i class="fab fa-linkedin fa-2x"></i></a>
         <a href="mailto:?subject=Candidate Profile: {{ target.candidate.name }}&body=Check out this candidate profile: {{ request.build_absolute_uri }}" target="_blank" style="margin-right:10px;"><i class="fas fa-envelope fa-2x"></i></a>
       </div>
