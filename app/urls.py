@@ -11,6 +11,8 @@ urlpatterns = [
     path('hor/<int:year>/constituencies', views.hor_constituencies, name='hor_constituencies'),
     path('hor/<int:year>/constituency/<str:constituency>/<int:candidate_id>', views.hor_fptp_candidate_detail, name='hor_fptp_candidate_detail'),
     path('hor/<int:year>/party/<str:party>/<int:candidate_id>', views.hor_pr_candidate_detail, name='hor_pr_candidate_detail'),
+
+    path('local/<int:year>/', views.local_home, name='local_home')
 ]
 
 if settings.DEBUG:

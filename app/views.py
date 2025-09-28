@@ -11,6 +11,9 @@ def home(request):
 def hor_home(request, year):
     return render(request, 'hor_home.html', {'year': year})
 
+def local_home(request, year):
+    return render(request, 'local_home.html', {'year': year})
+
 def about(request):
     tq=False
     user_count = User.objects.count()
