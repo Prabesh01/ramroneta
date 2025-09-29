@@ -8,7 +8,7 @@
             box-sizing: border-box;
         }
         
-        .container {
+        .container1 {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
@@ -193,12 +193,135 @@
             }
         }
 
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        .container h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        label .required {
+            color: #e74c3c;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #333;
+            background-color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .container h1 {
+                font-size: 24px;
+            }
+
+            select {
+                padding: 10px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+        }
+#search-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 20px;
+        }
   </style>
 {% endblock %}
 
 {% block content %}
     <section class="house-structure">
-        <div class="container">
+        <div class="container1">
             <div class="section-title">
                 <h2>Election for Local Government, {{year}}</h2>
                 <p>Election for Municipality's heads and ward's representatives</p>
@@ -225,12 +348,236 @@
             <img src="/static/img/local_ballot.jpg" alt="Local Government Structure" style="width:100%; max-width:800px; margin: 0 auto; display:block; border-radius:10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
 
 <p>After the election, municipal and district level assemblies and committees are formed.</p>
-
-            <div class="election-types">
-                <a href="#/local/{{year}}/municipalities" class="btn btn-secondary">View Municipality Head Candidates</a>
-                <a href="#/local/{{year}}/wards" class="btn btn-outline">View Ward Representative Candidates</a>
-            </div>
         </div>
     </section>
+<section id="search-section">
+    <div class="container">
+        <h1>Search Local Government Candidates</h1>
+        <form id="candidateForm">
+            <div class="form-group">
+                <label for="position">Position <span class="required">*</span></label>
+                <select id="position" name="position" required>
+                    <option value="">Select Position</option>
+                    <option value="MAYOR">Mayor / Chairperson</option>
+                    <option value="DEPUTY_MAYOR">Deputy Mayor / Vice-Chairperson</option>
+                    <option value="WARD_CHAIR">Ward Chairperson</option>
+                    <option value="FEMALE_MEMBER">Ward Female Member</option>
+                    <option value="DALIT_FEMALE">Ward Dalit Female Member</option>
+                    <option value="GENERAL_MEMBER">2x General Members</option>
+                </select>
+            </div>
 
+            <div class="form-group">
+                <label for="province">Province <span class="required">*</span></label>
+                <select id="province" name="province" required>
+                    <option value="">Select Province</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="district">District <span class="required">*</span></label>
+                <select id="district" name="district" required disabled>
+                    <option value="">Select District</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="municipalityGroup">
+                <label for="municipality">Municipality <span class="required">*</span></label>
+                <select id="municipality" name="municipality" required disabled>
+                    <option value="">Select Municipality</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="wardGroup">
+                <label for="ward">Ward <span class="required">*</span></label>
+                <select id="ward" name="ward" disabled>
+                    <option value="">Select Ward</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>View Candidates</button>
+        </form>
+    </div>
+</section>
+
+<script>
+
+let data = [];
+
+async function fetchData() {
+    try {
+        const response = await fetch('/static/json/municipalities.json');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        data = await response.json();
+        initializeForm();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('Failed to load location data. Please refresh the page.');
+    }
+}
+
+function initializeForm() {
+    data.forEach((province, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${province.name_en} (${province.name_np})`;
+        provinceSelect.appendChild(opt);
+    });
+}
+
+fetchData();
+
+        const provinceSelect = document.getElementById('province');
+        const districtSelect = document.getElementById('district');
+        const municipalitySelect = document.getElementById('municipality');
+        const positionSelect = document.getElementById('position');
+        const wardSelect = document.getElementById('ward');
+        const wardGroup = document.getElementById('wardGroup');
+        const municipalityGroup = document.getElementById('municipalityGroup');
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('candidateForm');
+
+
+        // Province change
+        provinceSelect.addEventListener('change', function() {
+            resetSelect(districtSelect, 'Select District');
+            resetSelect(municipalitySelect, 'Select Municipality');
+            resetSelect(wardSelect, 'Select Ward');
+            
+            if (this.value !== '') {
+                const districts = data[this.value].districts;
+                districts.forEach((district, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = `${this.value}-${idx}`;
+                    opt.textContent = `${district.name_en} (${district.name_np})`;
+                    districtSelect.appendChild(opt);
+                });
+                districtSelect.disabled = false;
+            } else {
+                districtSelect.disabled = true;
+            }
+            checkFormValidity();
+        });
+
+        // District change
+        districtSelect.addEventListener('change', function() {
+            resetSelect(municipalitySelect, 'Select Municipality');
+            resetSelect(wardSelect, 'Select Ward');
+            
+            if (this.value !== '') {
+                const [provIdx, distIdx, _] = this.value.split('-');
+                const municipalities = data[provIdx].districts[distIdx].municipalities;
+                municipalities.forEach((mun, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = `${this.value}-${idx}`;
+                    opt.textContent = `${mun.name_en} (${mun.name_np})`;
+                    municipalitySelect.appendChild(opt);
+                });
+                if (positionSelect.value === 'MAYOR' || positionSelect.value === 'DEPUTY_MAYOR') {
+                    municipalitySelect.disabled = true;
+                } else {
+                    municipalitySelect.disabled = false;
+                }
+            } else {
+                municipalitySelect.disabled = true;
+            }
+            checkFormValidity();
+        });
+
+        // Municipality change
+        municipalitySelect.addEventListener('change', function() {
+            resetSelect(wardSelect, 'Select Ward');
+            
+            if (this.value !== '') {
+                const [provIdx, distIdx, munIdx] = this.value.split('-');
+                const wards = data[provIdx].districts[distIdx].municipalities[munIdx].wards;
+                for (let i = 1; i <= wards; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = `Ward ${i}`;
+                    wardSelect.appendChild(opt);
+                }
+                updateWardRequirement();
+            }
+            checkFormValidity();
+        });
+
+        // Position change
+        positionSelect.addEventListener('change', function() {
+            updateWardRequirement();
+            checkFormValidity();
+        });
+
+        // Ward change
+        wardSelect.addEventListener('change', checkFormValidity);
+
+        function resetSelect(selectEl, placeholder) {
+            selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+            selectEl.disabled = true;
+        }
+
+        function updateWardRequirement() {
+            const position = positionSelect.value;
+            const isMayorOrDeputy = position === 'MAYOR' || position === 'DEPUTY_MAYOR';
+            
+            if (isMayorOrDeputy) {
+                wardSelect.removeAttribute('required');
+                wardGroup.querySelector('label .required').style.display = 'none';
+                wardSelect.disabled = true;
+                wardSelect.value = '';
+
+                municipalitySelect.removeAttribute('required');
+                municipalityGroup.querySelector('label .required').style.display = 'none';
+                municipalitySelect.disabled = true;
+                municipalitySelect.value = '';
+            } else{            
+                municipalitySelect.setAttribute('required', 'required');
+                municipalityGroup.querySelector('label .required').style.display = 'inline';
+                municipalitySelect.disabled = false;
+
+                if (municipalitySelect.value !== '') {
+                    wardSelect.setAttribute('required', 'required');
+                    wardGroup.querySelector('label .required').style.display = 'inline';
+                    wardSelect.disabled = false;
+                }
+            }
+        }
+
+        function checkFormValidity() {
+            const position = positionSelect.value;
+            const isMayorOrDeputy = position === 'MAYOR' || position === 'DEPUTY_MAYOR';
+            
+            const isValid = provinceSelect.value !== '' &&
+                          districtSelect.value !== '' &&
+                          position !== '' &&
+                          (isMayorOrDeputy || (municipalitySelect.value !== '' && wardSelect.value !== ''));
+            
+            submitBtn.disabled = !isValid;
+        }
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const position = positionSelect.value;
+            const isMayorOrDeputy = position === 'MAYOR' || position === 'DEPUTY_MAYOR';
+            
+            let url = '/local/{{year}}/candidates?';
+            
+            const [provIdx, distIdx] = districtSelect.value.split('-');
+            const districtId = data[provIdx].districts[distIdx].id;
+            if (isMayorOrDeputy) {
+                url += `district=${districtId}&type=${encodeURIComponent(position)}`;
+            } else {
+                const wardNum = wardSelect.value;
+                const [provIdx, munIdx] = municipalitySelect.value.split('-');
+                const municipalityId = data[provIdx].districts[distIdx].municipalities[munIdx].id;
+
+                url += `municipality=${municipalityId}&ward=${wardNum}&type=${encodeURIComponent(position)}`;
+            }
+            
+            window.location.href = url;
+        });
+
+</script>
 {% endblock %}
