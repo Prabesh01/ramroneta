@@ -3,4 +3,5 @@ __init__.py
 __pycache__/
 migrations/
 db.sqlite3
-uploads/
+uploads/*
+!uploads/maps/
