@@ -659,23 +659,52 @@ class Province_Constituency(models.TextChoices):
 
 
 class House(models.TextChoices):
-    HOUSE_OF_REPRESENTATIVES = 'HOUSE_OF_REPRESENTATIVES', 'House of Representatives'
     NATIONAL_ASSEMBLY = 'NATIONAL_ASSEMBLY', 'National Assembly'
+    HOUSE_OF_REPRESENTATIVES = 'HOUSE_OF_REPRESENTATIVES', 'House of Representatives'
     PROVINCE_ASSEMBLY = 'PROVINCE_ASSEMBLY', 'Province Assembly'
+    LOCAL_LEVEL = 'LOCAL_LEVEL', 'Local Level'
 
 class ElectionYears(models.IntegerChoices):
     Y2026 = 2026, "2082"
+    Y2022 = 2022, "2079"
+
+class LocalPositions(models.TextChoices):
+    MAYOR = 'MAYOR'
+    DEPUTY_MAYOR = 'DEPUTY_MAYOR'
+    WARD_CHAIR = 'WARD_CHAIR'
+    FEMALE_MEMBER = 'FEMALE_MEMBER'
+    DALIT_FEMALE = 'DALIT_FEMALE'
+    GENERAL_MEMBER = 'GENERAL_MEMBER'
+
+class District(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    name_np = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Municipality(models.Model):
+    name = models.CharField(max_length=100)
+    name_np = models.CharField(max_length=100)
+    district = models.ForeignKey(District, on_delete=models.CASCADE)
+    wards = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name}, {self.district.name}"
 
 class Representative(models.Model):
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     house = models.CharField(max_length=30, choices=House.choices,default="HOUSE_OF_REPRESENTATIVES")
     hor_constituency = models.CharField(max_length=50, choices=HoR_Constituency.choices, blank=True, null=True)
     province_constituency = models.CharField(max_length=50, choices=Province_Constituency.choices, blank=True, null=True)
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, blank=True, null=True)
+    local_position = models.CharField(max_length=50, choices=LocalPositions.choices, blank=True, null=True)
+    ward = models.IntegerField(blank=True, null=True)
     year = models.IntegerField(choices=ElectionYears.choices,default=2026)
     party = models.ForeignKey(Party, on_delete=models.CASCADE,null=True,blank=True)
     proportional = models.BooleanField(default=False)
-    winner = models.BooleanField(default=False)
     order = models.IntegerField(blank=True,null=True)
+    winner = models.BooleanField(default=False)
     promise = models.TextField(blank=True, null=True)
     symbol = models.ImageField(upload_to=get_flag_image_path, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), image_validate])
 

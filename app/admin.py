@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency
+from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency, Municipality, District
 from django.core.exceptions import ValidationError
 from django import forms
 from django.db.models import Q
@@ -232,7 +232,8 @@ class RepresentativeAdmin(admin.ModelAdmin):
         user_prefix = username.upper()
         return qs.filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
-            Q(candidate__representative__province_constituency__startswith=user_prefix)
+            Q(candidate__representative__province_constituency__startswith=user_prefix) |
+            Q(candidate__representative__municipality__district__name__startswith=user_prefix)
         ).distinct()
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -251,6 +252,11 @@ class RepresentativeAdmin(admin.ModelAdmin):
                 ]
         return super().formfield_for_choice_field(db_field, request, **kwargs)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "municipality" and not request.user.is_superuser:
+            kwargs["queryset"] = Municipality.objects.filter(district__name__startswith=request.user.username)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     # hide proportional and order field from mods, as they are for PR.
     # hide hor_constituency and province_constituency from prmods as they are for FPTP.
     # check proportional field by default. require order field.
@@ -258,7 +264,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         if request.user.username.startswith('pr-'):
             for field_name, field in form.base_fields.items():
-                if field_name in ['hor_constituency','province_constituency']:
+                if field_name in ['hor_constituency','province_constituency','municipality','local_position','ward']:
                     field.widget = forms.HiddenInput()
                 if field_name == 'proportional':
                     field.initial = True
@@ -301,13 +307,10 @@ class RepresentativeAdmin(admin.ModelAdmin):
 
         user_prefix = username.upper()
 
-        # if obj.candidate.added_by != request.user:
-        if not obj.candidate.added_by.username.upper().startswith(user_prefix) and not user_prefix.startswith(obj.candidate.added_by.username.upper()):
-            raise ValidationError('You are not allowed to set Representative for that candidate')
         # if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
-        if not obj.hor_constituency and not obj.province_constituency:
+        if not obj.hor_constituency and not obj.province_constituency and not obj.municipality:
             raise ValidationError('Must choose one constituency')
-        if obj.hor_constituency and obj.province_constituency:
+        if (obj.hor_constituency and obj.province_constituency) or (obj.hor_constituency and obj.municipality) or (obj.province_constituency and obj.municipality):
             raise ValidationError('Choose only one constituency')
         if (
             obj.hor_constituency
@@ -315,9 +318,13 @@ class RepresentativeAdmin(admin.ModelAdmin):
         ) or (
             obj.province_constituency
             and obj.province_constituency.startswith(user_prefix)
+        ) or (
+            obj.municipality
+            and obj.municipality.district.name.lower().startswith(username.lower())
         ):
             super().save_model(request, obj, form, change)
-        else: raise ValidationError('You are not allowed to set Representative of that constituency')
+        else:             
+            raise ValidationError('You are not allowed to set Representative of that constituency')
 
 
 class PartyAdmin(admin.ModelAdmin):
@@ -343,10 +350,54 @@ class PartyAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         if request.user.is_superuser: return True        
-        return False   
+        return False
+
+class MunicipalityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'name_np', 'district', 'wards')
+    search_fields = ('name',)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser: return qs
+
+        username = request.user.username
+        return qs.filter(district__name__startswith=username)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False           
+
+
+class DistrictAdmin(admin.ModelAdmin):
+    list_display = ('name', 'name_np')
+    search_fields = ('name',)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser: return qs
+        
+        username = request.user.username
+        return qs.filter(name__startswith=username)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False           
+
 
 admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(Case, CaseAdmin)
 admin.site.register(Kartut, KartutAdmin)
 admin.site.register(Representative, RepresentativeAdmin)
 admin.site.register(Party, PartyAdmin)
+admin.site.register(Municipality, MunicipalityAdmin)
+admin.site.register(District, DistrictAdmin)

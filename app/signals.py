@@ -10,10 +10,9 @@ def create_mod_grp_and_assign(sender, instance, created, **kwargs):
     if not instance.is_staff: return
     mod_group, created = Group.objects.get_or_create(name='mod')
     if created:
-        codenames = ['add_candidate', 'change_candidate', 'delete_candidate', 'view_candidate', 'add_case', 'change_case', 'delete_case', 'view_case', 'add_kartut', 'change_kartut', 'delete_kartut', 'view_kartut', 'view_party', 'add_representative', 'change_representative', 'delete_representative', 'view_representative', 'view_user']
+        codenames = ['add_candidate', 'change_candidate', 'delete_candidate', 'view_candidate', 'add_case', 'change_case', 'delete_case', 'view_case', 'add_kartut', 'change_kartut', 'delete_kartut', 'view_kartut', 'view_party', 'add_representative', 'change_representative', 'delete_representative', 'view_representative', 'view_user', 'view_district', 'view_municipality']
         perms = Permission.objects.filter(codename__in=codenames)
         mod_group.permissions.set(perms)
-
     instance.groups.add(mod_group)
 
 def cleanup_file_on_change(sender, instance, field_name: str):
