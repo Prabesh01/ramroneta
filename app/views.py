@@ -163,10 +163,10 @@ def local_candidates(request, year):
     if target:
         constituency = f"{target.municipality.name} - {target.ward.name}, {target.municipality.district.name}"  if not position in ["MAYOR","DEPUTY-MAYOR"] else target.district.name
 
-        candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.local_position.title()}"
+        candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.local_position.replace('_',' ').title()}"
 
     else: 
         constituency = ""
         candidate_tag = ""
 
-    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': local_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"Local Level",'election_type':'FPTP','candidate_tag':candidate_tag})
+    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': local_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"Local Level",'election_type':target.local_position.replace('_',' ').title() if target else '','candidate_tag':candidate_tag})
