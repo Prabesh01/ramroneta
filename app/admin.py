@@ -215,6 +215,9 @@ class RepresentativeAdmin(admin.ModelAdmin):
     search_fields = ('candidate__name',)
     list_filter = ('house',)
 
+    class Media:
+        js = ('admin/js/representative_admin.js',)
+
     # get_queryset: self constituency only.
     def get_queryset(self, request):
         qs = super().get_queryset(request)
