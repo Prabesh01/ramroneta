@@ -5,6 +5,8 @@ np_provinces = json.load(open('np.json'))
 
 data= [] # [{"province_en":"","province_np":"",districts:[{"district_en":"","district_np":"","municipalities":[{"municipal_en":"","municipal_np":"","wards":0}]}]}]
 
+did = 0
+mid = 0
 for en_province in en_provinces:
     np_province = next((item for item in np_provinces if item["id"] == en_province["id"]), None)
     province = {
@@ -24,8 +26,10 @@ for en_province in en_provinces:
         np_districts_list = np_province["districts"] if np_province else []
 
     for en_district in en_districts_list:
+        did += 1
         np_district = next((item for item in np_districts_list if item["id"] == en_district["id"]), None) if np_province else None
         district = {
+            "id": did,
             "name_en": en_district["name"],
             "name_np": np_district["name"] if np_district else "",
             "municipalities": []
@@ -42,8 +46,10 @@ for en_province in en_provinces:
             np_municipalities_list = np_district["municipalities"] if np_district else []
 
         for en_municipal in en_municipalities_list:
+            mid += 1
             np_municipal = next((item for item in np_municipalities_list if item["id"] == en_municipal["id"]), None) if np_district else None
             municipal = {
+                "id": mid,
                 "name_en": en_municipal["name"],
                 "name_np": np_municipal["name"] if np_municipal else "",
                 "wards": len(en_municipal["wards"])
