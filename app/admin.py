@@ -236,7 +236,8 @@ class RepresentativeAdmin(admin.ModelAdmin):
         return qs.filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
             Q(candidate__representative__province_constituency__startswith=user_prefix) |
-            Q(candidate__representative__municipality__district__name__startswith=user_prefix)
+            Q(candidate__representative__municipality__district__name__startswith=user_prefix) |
+            Q(candidate__representative__district__name__startswith=user_prefix)
         ).distinct()
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -258,6 +259,9 @@ class RepresentativeAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "municipality" and not request.user.is_superuser:
             kwargs["queryset"] = Municipality.objects.filter(district__name__startswith=request.user.username)
+        if db_field.name == "district" and not request.user.is_superuser:
+            kwargs["queryset"] = District.objects.filter(name__startswith=request.user.username)
+
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     # hide proportional and order field from mods, as they are for PR.
@@ -267,7 +271,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         if request.user.username.startswith('pr-'):
             for field_name, field in form.base_fields.items():
-                if field_name in ['hor_constituency','province_constituency','municipality','local_position','ward']:
+                if field_name in ['hor_constituency','province_constituency','municipality','district','local_position','ward']:
                     field.widget = forms.HiddenInput()
                 if field_name == 'proportional':
                     field.initial = True
@@ -311,9 +315,9 @@ class RepresentativeAdmin(admin.ModelAdmin):
         user_prefix = username.upper()
 
         # if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
-        if not obj.hor_constituency and not obj.province_constituency and not obj.municipality:
+        if not obj.hor_constituency and not obj.province_constituency and not obj.municipality and not obj.district:
             raise ValidationError('Must choose one constituency')
-        if (obj.hor_constituency and obj.province_constituency) or (obj.hor_constituency and obj.municipality) or (obj.province_constituency and obj.municipality):
+        if (obj.hor_constituency and obj.province_constituency) or (obj.hor_constituency and obj.municipality) or (obj.province_constituency and obj.municipality) or (obj.hor_constituency and obj.district) or (obj.province_constituency and obj.district) or (obj.municipality and obj.district):
             raise ValidationError('Choose only one constituency')
         if (
             obj.hor_constituency
@@ -324,6 +328,9 @@ class RepresentativeAdmin(admin.ModelAdmin):
         ) or (
             obj.municipality
             and obj.municipality.district.name.lower().startswith(username.lower())
+        ) or (
+            obj.district
+            and obj.district.name.lower().startswith(username.lower())
         ):
             super().save_model(request, obj, form, change)
         else:             
