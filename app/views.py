@@ -66,7 +66,10 @@ def hor_fptp_candidate_detail(request, year, constituency, candidate_id):
             return redirect('hor_fptp_candidate_detail', year=year, constituency=constituency, candidate_id=target.candidate.id)
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
-    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': fptp_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'FPTP'})
+    candidate_tag=""
+    if target: candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.hor_constituency.title()}"
+
+    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': fptp_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'FPTP','candidate_tag':candidate_tag})
 
 def hor_pr_candidate_detail(request, year, party, candidate_id):
     pr_candidates = Representative.objects.filter(year=year, party__id=party, proportional=True)
@@ -100,7 +103,10 @@ def hor_pr_candidate_detail(request, year, party, candidate_id):
             return redirect('hor_pr_candidate_detail', year=year, party=party, candidate_id=target.candidate.id)
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
-    return render(request, 'candidate.html', {'year': year, 'constituency': target.party.name if target else '', 'candidates': pr_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'PR'})
+    candidate_tag=""
+    if target: candidate_tag = f"{target.party.name} PR candidate: #{target.order}"
+
+    return render(request, 'candidate.html', {'year': year, 'constituency': target.party.name if target else '', 'candidates': pr_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"HoR",'election_type':'PR','candidate_tag':candidate_tag})
 
 def hor_parties(request, year):
     parties = Party.objects.filter(
@@ -110,3 +116,57 @@ def hor_parties(request, year):
     ).distinct().order_by('-rep_count', 'name')
 
     return render(request, 'party_list.html', {'year': year, 'parties': parties})
+
+def local_candidates(request, year):
+    position = request.GET.get('type','')
+    district_id = request.GET.get('district','')
+    municipality_id = request.GET.get('municipality','')
+    ward = request.GET.get('ward','')
+    candidate_id = request.GET.get('candidate','')
+
+    if ward:
+        local_candidates = Representative.objects.filter(year=year, house="LOCAL_LEVEL", municipality=municipality_id, ward=ward, local_position=position)
+    else:
+        local_candidates = Representative.objects.filter(year=year, house="LOCAL_LEVEL", district__id=district_id, local_position=position)
+
+    if candidate_id:
+        target = Representative.objects.select_related(
+            'candidate', 'party'
+        ).get(
+            candidate__id=candidate_id,
+            year=year,
+            house="LOCAL_LEVEL",
+            local_position=position,
+        )
+        
+        cases = Case.objects.filter(candidate=target.candidate).order_by('-date_filed')
+        case_counts = cases.values('case_type').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        case_counts = {
+            item['case_type']: item['count'] for item in case_counts
+        }        
+        total_cases = cases.count()
+        other_cases_count = total_cases - case_counts['serious'] if 'serious' in case_counts else total_cases
+
+        kartuts_list = Kartut.objects.filter(candidate=target.candidate).order_by('-kartuts_date')
+        kartuts = defaultdict(list)
+        for item in kartuts_list:
+            kartuts[item.kartut_type].append(item)
+        kartuts = dict(kartuts)
+    else:
+        if local_candidates.exists():
+            target = local_candidates.first()
+            return redirect(f'/local/{year}/candidates?type={position}&district={district_id}&municipality={municipality_id}&ward={ward}&candidate={target.candidate.id}')
+        target = cases = kartuts = case_counts = total_cases = other_cases_count = None
+
+    if target:
+        constituency = f"{target.municipality.name} - {target.ward.name}, {target.municipality.district.name}"  if not position in ["MAYOR","DEPUTY-MAYOR"] else target.district.name
+
+        candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.local_position.title()}"
+
+    else: 
+        constituency = ""
+        candidate_tag = ""
+
+    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': local_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"Local Level",'election_type':'FPTP','candidate_tag':candidate_tag})
