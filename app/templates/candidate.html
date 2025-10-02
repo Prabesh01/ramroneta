@@ -4,6 +4,9 @@
 
 {% block css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<script data-isso="//comments.hamroneta.info/" src="//comments.hamroneta.info/js/embed.min.js"></script>
+
   <style>
     * {
         box-sizing: border-box;
@@ -608,9 +611,16 @@
         <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title=Candidate Profile: {{ target.candidate.name }}" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
         <a href="mailto:?subject=Candidate Profile: {{ target.candidate.name }}&body=Check out this candidate profile: {{ request.build_absolute_uri }}" target="_blank"><i class="fas fa-envelope fa-2x"></i></a>
       </div>
+
+<section id="isso-thread"> 
+  <noscript>Javascript needs to be activated to view comments.</noscript>      
+</section>
+
     </main>
 {% endif %}
-    </div>
+    </div>In this election, you will cast two votes: one on your favorite candidate's symbol and another on your favorite party's symbol.
+FPTP Ballot PR Ballot
+
     
   <!-- Source Modal -->
   <div class="source-modal" id="sourceModal">

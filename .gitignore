@@ -7,3 +7,4 @@ uploads/*
 !uploads/maps/
 static/
 !app/static/
+comments.db
