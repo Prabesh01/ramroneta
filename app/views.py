@@ -119,7 +119,6 @@ def hor_parties(request, year):
 
 def local_candidates(request, year):
     position = request.GET.get('type','')
-    district_id = request.GET.get('district','')
     municipality_id = request.GET.get('municipality','')
     ward = request.GET.get('ward','')
     candidate_id = request.GET.get('candidate','')
@@ -127,7 +126,7 @@ def local_candidates(request, year):
     if ward:
         local_candidates = Representative.objects.filter(year=year, house="LOCAL_LEVEL", municipality=municipality_id, ward=ward, local_position=position)
     else:
-        local_candidates = Representative.objects.filter(year=year, house="LOCAL_LEVEL", district__id=district_id, local_position=position)
+        local_candidates = Representative.objects.filter(year=year, house="LOCAL_LEVEL", municipality=municipality_id, local_position=position)
 
     if candidate_id:
         target = Representative.objects.select_related(
@@ -157,11 +156,11 @@ def local_candidates(request, year):
     else:
         if local_candidates.exists():
             target = local_candidates.first()
-            return redirect(f'/local/{year}/candidates?type={position}&district={district_id}&municipality={municipality_id}&ward={ward}&candidate={target.candidate.id}')
+            return redirect(f'/local/{year}/candidates?type={position}&municipality={municipality_id}&ward={ward}&candidate={target.candidate.id}')
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
     if target:
-        constituency = f"{target.municipality.name} - {target.ward.name}, {target.municipality.district.name}"  if not position in ["MAYOR","DEPUTY-MAYOR"] else target.district.name
+        constituency = f"{target.municipality.name}"+f"- {target.ward.name}" if target.ward else ""+ f", {target.municipality.district.name}"
 
         candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.local_position.replace('_',' ').title()}"
 

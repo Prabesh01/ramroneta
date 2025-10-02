@@ -352,7 +352,7 @@
     </section>
 <section id="search-section">
     <div class="container">
-        <h1>Search Local Government Candidates</h1>
+        <h1>Choose your municipality</h1>
         <form id="candidateForm">
             <div class="form-group">
                 <label for="position">Position <span class="required">*</span></label>
@@ -433,7 +433,6 @@ fetchData();
         const positionSelect = document.getElementById('position');
         const wardSelect = document.getElementById('ward');
         const wardGroup = document.getElementById('wardGroup');
-        const municipalityGroup = document.getElementById('municipalityGroup');
         const submitBtn = document.getElementById('submitBtn');
         const form = document.getElementById('candidateForm');
 
@@ -473,11 +472,7 @@ fetchData();
                     opt.textContent = `${mun.name_en} (${mun.name_np})`;
                     municipalitySelect.appendChild(opt);
                 });
-                if (positionSelect.value === 'MAYOR' || positionSelect.value === 'DEPUTY_MAYOR') {
-                    municipalitySelect.disabled = true;
-                } else {
-                    municipalitySelect.disabled = false;
-                }
+                municipalitySelect.disabled = false;
             } else {
                 municipalitySelect.disabled = true;
             }
@@ -525,16 +520,7 @@ fetchData();
                 wardGroup.querySelector('label .required').style.display = 'none';
                 wardSelect.disabled = true;
                 wardSelect.value = '';
-
-                municipalitySelect.removeAttribute('required');
-                municipalityGroup.querySelector('label .required').style.display = 'none';
-                municipalitySelect.disabled = true;
-                municipalitySelect.value = '';
-            } else{            
-                municipalitySelect.setAttribute('required', 'required');
-                municipalityGroup.querySelector('label .required').style.display = 'inline';
-                municipalitySelect.disabled = false;
-
+            } else {
                 if (municipalitySelect.value !== '') {
                     wardSelect.setAttribute('required', 'required');
                     wardGroup.querySelector('label .required').style.display = 'inline';
@@ -550,7 +536,8 @@ fetchData();
             const isValid = provinceSelect.value !== '' &&
                           districtSelect.value !== '' &&
                           position !== '' &&
-                          (isMayorOrDeputy || (municipalitySelect.value !== '' && wardSelect.value !== ''));
+                          municipalitySelect.value !== '' &&
+                          (isMayorOrDeputy || wardSelect.value !== '');
             
             submitBtn.disabled = !isValid;
         }
@@ -566,13 +553,14 @@ fetchData();
             
             const [provIdx, distIdx] = districtSelect.value.split('-');
             const districtId = data[provIdx].districts[distIdx].id;
+
+            const [_, munIdx] = municipalitySelect.value.split('-');
+            const municipalityId = data[provIdx].districts[distIdx].municipalities[munIdx].id;
+
             if (isMayorOrDeputy) {
-                url += `district=${districtId}&type=${encodeURIComponent(position)}`;
+                url += `municipality=${municipalityId}&type=${encodeURIComponent(position)}`;
             } else {
                 const wardNum = wardSelect.value;
-                const [provIdx, munIdx] = municipalitySelect.value.split('-');
-                const municipalityId = data[provIdx].districts[distIdx].municipalities[munIdx].id;
-
                 url += `municipality=${municipalityId}&ward=${wardNum}&type=${encodeURIComponent(position)}`;
             }
             
