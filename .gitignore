@@ -5,3 +5,5 @@ migrations/
 db.sqlite3
 uploads/*
 !uploads/maps/
+static/
+!app/static/
