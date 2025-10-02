@@ -698,7 +698,6 @@ class Representative(models.Model):
     hor_constituency = models.CharField(max_length=50, choices=HoR_Constituency.choices, blank=True, null=True)
     province_constituency = models.CharField(max_length=50, choices=Province_Constituency.choices, blank=True, null=True)
     local_position = models.CharField(max_length=50, choices=LocalPositions.choices, blank=True, null=True)
-    district = models.ForeignKey(District, on_delete=models.CASCADE, blank=True, null=True)
     municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, blank=True, null=True)
     ward = models.IntegerField(blank=True, null=True)
     year = models.IntegerField(choices=ElectionYears.choices,default=2026)
@@ -715,6 +714,9 @@ class Representative(models.Model):
             raise ValidationError({'hor_constituency': 'Either hor_constituency or proportional field is required for House of Representatives.'})
         if self.house == House.PROVINCE_ASSEMBLY and (not self.province_constituency and not self.proportional):
             raise ValidationError({'province_constituency': 'Either province_constituency or proportional field is required for Province Assembly.'})
+        if self.house == House.LOCAL_LEVEL and (not self.municipality and not self.proportional):
+            raise ValidationError({'municipality': 'Municipality is required for Local Level.'})
+
 
         existing_representatives = Representative.objects.filter(
             # check candidate name
@@ -722,6 +724,8 @@ class Representative(models.Model):
             house=self.house,
             hor_constituency=self.hor_constituency,
             province_constituency=self.province_constituency,
+            municipality=self.municipality,
+            ward=self.ward,
             year=self.year,
             party=self.party,
             proportional=self.proportional
@@ -733,4 +737,4 @@ class Representative(models.Model):
 
     # disallow: same candidate, same year, exists: hor,pc,proportional
     class Meta:
-        unique_together = ('candidate', 'house', 'hor_constituency', 'province_constituency', 'year', 'proportional')
+        unique_together = ('candidate', 'house', 'hor_constituency', 'province_constituency', 'municipality', 'ward', 'year', 'proportional')

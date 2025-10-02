@@ -2,9 +2,10 @@ from django.contrib import admin
 from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency, Municipality, District
 from django.core.exceptions import ValidationError
 from django import forms
-from django.db.models import Q
+from django.db.models import Value, CharField, Q
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group
+from django.db.models.functions import Concat
 
 class UserAdmin(BaseUserAdmin):
     def get_queryset(self, request):
@@ -89,6 +90,12 @@ def mod_perm_check(request,obj):
             ) or (
                 rep.province_constituency
                 and rep.province_constituency.startswith(user_prefix)
+            ) or (
+                rep.municipality
+                and rep.municipality.district.name.lower().startswith(username.lower())
+            ) or (
+                rep.municipality
+                and rep.municipality.__str__().lower().startswith(username.replace('_',' ').replace('@',', ').lower())
             ):
                 valid_username = True
                 break
@@ -111,10 +118,18 @@ def mod_qs(qs,request):
         ).distinct()
 
     user_prefix = username.upper()
-    return qs.filter(
+    return qs.annotate(
+        full_display=Concat(
+        'candidate__representative__municipality__name', 
+        Value(', '), 
+        'candidate__representative__municipality__district__name',
+        output_field=CharField()
+    )).filter(
         Q(candidate__representative__hor_constituency__startswith=user_prefix) |
-        Q(candidate__representative__province_constituency__startswith=user_prefix)
-    ).distinct()    
+        Q(candidate__representative__province_constituency__startswith=user_prefix) |
+        Q(candidate__representative__municipality__district__name__istartswith=username) |
+        Q(full_display__istartswith=username.replace('_',' ').replace('@',', '))
+    ).distinct()
 
 class CandidateAdmin(admin.ModelAdmin):
     # display these columns
@@ -139,10 +154,19 @@ class CandidateAdmin(admin.ModelAdmin):
             return qs.filter(added_by__username__endswith='-'+party_code)
 
         user_prefix = username.upper()
-        return qs.filter(
+        return qs.annotate(
+            full_display=Concat(
+                'representative__municipality__name', 
+                Value(', '), 
+                'representative__municipality__district__name',
+                output_field=CharField()
+            )
+        ).filter(
             Q(added_by=request.user) |
             Q(representative__hor_constituency__startswith=user_prefix) |
-            Q(representative__province_constituency__startswith=user_prefix)
+            Q(representative__province_constituency__startswith=user_prefix) |
+            Q(representative__municipality__district__name__istartswith=username) |
+            Q(full_display__istartswith=username.replace('_',' ').replace('@',', '))
         ).distinct()
 
     # since added_by is non-editable field, it shall be set here.
@@ -233,11 +257,17 @@ class RepresentativeAdmin(admin.ModelAdmin):
             )
 
         user_prefix = username.upper()
-        return qs.filter(
+        return qs.annotate(
+                full_display=Concat(
+                'candidate__representative__municipality__name', 
+                Value(', '), 
+                'candidate__representative__municipality__district__name',
+                output_field=CharField()
+        )).filter(
             Q(candidate__representative__hor_constituency__startswith=user_prefix) |
             Q(candidate__representative__province_constituency__startswith=user_prefix) |
-            Q(candidate__representative__municipality__district__name__startswith=user_prefix) |
-            Q(candidate__representative__district__name__startswith=user_prefix)
+            Q(candidate__representative__municipality__district__name__istartswith=username) |
+            Q(full_display__istartswith=username.replace('_',' ').replace('@',', '))
         ).distinct()
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -258,9 +288,16 @@ class RepresentativeAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "municipality" and not request.user.is_superuser:
-            kwargs["queryset"] = Municipality.objects.filter(district__name__startswith=request.user.username)
-        if db_field.name == "district" and not request.user.is_superuser:
-            kwargs["queryset"] = District.objects.filter(name__startswith=request.user.username)
+            kwargs["queryset"] = Municipality.objects.annotate(
+                full_display=Concat(
+                    'name', 
+                    Value(', '), 
+                    'district__name',
+                    output_field=CharField()
+                )).filter(
+                        Q(district__name__istartswith=request.user.username) |
+                        Q(full_display__istartswith=request.user.username.replace('_',' ').replace('@',', '))
+                    )
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -271,7 +308,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         if request.user.username.startswith('pr-'):
             for field_name, field in form.base_fields.items():
-                if field_name in ['hor_constituency','province_constituency','municipality','district','local_position','ward']:
+                if field_name in ['hor_constituency','province_constituency','municipality','local_position','ward']:
                     field.widget = forms.HiddenInput()
                 if field_name == 'proportional':
                     field.initial = True
@@ -298,7 +335,7 @@ class RepresentativeAdmin(admin.ModelAdmin):
                 raise ValidationError('party field missing!')
             if obj.party.id != party_code:
                 raise ValidationError('You are not allowed to set Representative for that party')
-            if obj.hor_constituency or obj.province_constituency:
+            if obj.hor_constituency or obj.province_constituency or obj.municipality:
                 raise ValidationError('You aren\'t supposed to set constituency candidates')
             if not obj.order:
                 raise ValidationError('order field missing!')
@@ -315,9 +352,9 @@ class RepresentativeAdmin(admin.ModelAdmin):
         user_prefix = username.upper()
 
         # if obj.hor_constituency.startswith(request.user.username) or obj.province_constituency.startswith(request.user.username):
-        if not obj.hor_constituency and not obj.province_constituency and not obj.municipality and not obj.district:
+        if not obj.hor_constituency and not obj.province_constituency and not obj.municipality:
             raise ValidationError('Must choose one constituency')
-        if (obj.hor_constituency and obj.province_constituency) or (obj.hor_constituency and obj.municipality) or (obj.province_constituency and obj.municipality) or (obj.hor_constituency and obj.district) or (obj.province_constituency and obj.district) or (obj.municipality and obj.district):
+        if (obj.hor_constituency and obj.province_constituency) or (obj.hor_constituency and obj.municipality) or (obj.province_constituency and obj.municipality):
             raise ValidationError('Choose only one constituency')
         if (
             obj.hor_constituency
@@ -329,8 +366,8 @@ class RepresentativeAdmin(admin.ModelAdmin):
             obj.municipality
             and obj.municipality.district.name.lower().startswith(username.lower())
         ) or (
-            obj.district
-            and obj.district.name.lower().startswith(username.lower())
+            obj.municipality
+            and obj.municipality.__str__().lower().startswith(username.replace('_',' ').replace('@',', ').lower())
         ):
             super().save_model(request, obj, form, change)
         else:             
@@ -371,7 +408,16 @@ class MunicipalityAdmin(admin.ModelAdmin):
         if request.user.is_superuser: return qs
 
         username = request.user.username
-        return qs.filter(district__name__startswith=username)
+        return qs.annotate(
+            full_display=Concat(
+                'candidate__representative__municipality__name', 
+                Value(', '), 
+                'candidate__representative__municipality__district__name',
+                output_field=CharField()
+        )).filter(
+            Q(district__name__istartswith=username) |
+            Q(full_display__istartswith=request.user.username.replace('_',' ').replace('@',', '))
+        )
 
     def has_add_permission(self, request):
         return False
@@ -386,13 +432,6 @@ class MunicipalityAdmin(admin.ModelAdmin):
 class DistrictAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_np')
     search_fields = ('name',)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser: return qs
-        
-        username = request.user.username
-        return qs.filter(name__startswith=username)
 
     def has_add_permission(self, request):
         return False
