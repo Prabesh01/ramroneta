@@ -160,7 +160,7 @@ def local_candidates(request, year):
         target = cases = kartuts = case_counts = total_cases = other_cases_count = None
 
     if target:
-        constituency = f"{target.municipality.name}"+f"- {target.ward.name}" if target.ward else ""+ f", {target.municipality.district.name}"
+        constituency = f"{target.municipality.name}"+(f" - {target.ward}" if target.ward else "")+ f", {target.municipality.district.name}"
 
         candidate_tag = f"{target.party.name if target.party else 'Independent'} candidate for {target.local_position.replace('_',' ').title()}"
 
