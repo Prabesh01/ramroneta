@@ -5,7 +5,7 @@
 {% block css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-<script data-isso="/isso" data-isso-page-author-hashes="ccfe200c3b8b" src="/isso/js/embed.min.js"></script>
+<script data-isso="/isso" data-isso-page-author-hashes="ccfe200c3b8b" data-isso-id="/candidate/{{target.candidate.id}}" src="/isso/js/embed.min.js"></script>
 
   <style>
     * {
@@ -658,7 +658,7 @@ input[name="preview"] {
         <a href="mailto:?subject=Candidate Profile: {{ target.candidate.name }}&body=Check out this candidate profile: {{ request.build_absolute_uri }}" target="_blank"><i class="fas fa-envelope fa-2x"></i></a>
       </div>
 
-<section id="isso-thread"> 
+<section id="isso-thread" data-isso-id="/candidate/{{target.candidate.id}}"> 
   <noscript>Javascript needs to be activated to view comments.</noscript>      
 </section>
 
