@@ -6,6 +6,7 @@ import requests
 from django.contrib.auth.models import User
 import os
 from dotenv import load_dotenv
+from django.http import HttpResponse
 
 load_dotenv()
 
@@ -34,6 +35,9 @@ def about(request):
 
 def hor_constituencies(request, year):
     return render(request, 'hor_constituencies.html', {'year': year})
+
+def respond_ok(request, candidate_id):
+    return HttpResponse("OK")
 
 def hor_fptp_candidate_detail(request, year, constituency, candidate_id):
     fptp_candidates = Representative.objects.filter(year=year, hor_constituency=constituency, proportional=False)

@@ -13,7 +13,9 @@ urlpatterns = [
     path('hor/<int:year>/party/<str:party>/<int:candidate_id>', views.hor_pr_candidate_detail, name='hor_pr_candidate_detail'),
 
     path('local/<int:year>/', views.local_home, name='local_home'),
-    path('local/<int:year>/candidates', views.local_candidates, name='local_candidates')
+    path('local/<int:year>/candidates', views.local_candidates, name='local_candidates'),
+
+    path('candidate/<int:candidate_id>', views.respond_ok, name='for_isso'),
 ]
 
 if settings.DEBUG:
