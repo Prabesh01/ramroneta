@@ -1,7 +1,7 @@
 [
     {
-        "name_en": "Koshi Province",
-        "name_np": "प्रदेश न. १",
+        "name_en": "Koshi",
+        "name_np": "कोशी",
         "districts": [
             {
                 "id": 1,
@@ -926,8 +926,8 @@
         ]
     },
     {
-        "name_en": "Madhesh Province",
-        "name_np": "प्रदेश न. २",
+        "name_en": "Madhesh",
+        "name_np": "मधेश",
         "districts": [
             {
                 "id": 15,
