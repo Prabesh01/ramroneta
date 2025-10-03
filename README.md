@@ -15,7 +15,7 @@ _Admin can create staff accounts with scoped permissions allowing users to eithe
 
 ### Setup for Self-host 
 
-_Update ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS in `ramroneta/settings.py`_
+_Copy `.env.example` to `.env` and Update ALLOWED_HOSTS & CSRF_TRUSTED_ORIGINS in `ramroneta/settings.py`_
 
 - python3 manage.py collectstatic
 

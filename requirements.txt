@@ -12,3 +12,4 @@ urllib3==2.5.0
 gunicorn
 setuptools
 isso
+python-dotenv

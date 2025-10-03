@@ -4,6 +4,10 @@ from django.db.models import Count
 from collections import defaultdict
 import requests
 from django.contrib.auth.models import User
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def home(request):
     return render(request, 'home.html')
@@ -19,11 +23,11 @@ def about(request):
     user_count = User.objects.count()
 
     if request.method == 'POST':
-        message = "**myneta.np form submission:**\n"
+        message = "**hamroneta.info form submission:**\n"
         for key, value in request.POST.items():
             if key == 'csrfmiddlewaretoken': continue
             message += f"{key.title()}: `{value}`\n"
-        requests.post(''.join(chr((ord(c) - 3) % 256) for c in 'xhVe607G\\9iSY3hzwQTw5FPbW]qdIHZ;{UzqI:v{lZuh8ZyhrQnyPqXQp4vWs5bVFw7x295:6:47687735<635742vnrrkehz2lsd2prf1gurfvlg22=vswwk')[::-1], json={"content": message})
+        requests.post(os.getenv("discord_webhook_url"), json={"content": message})
         tq=True
 
     return render(request,'about.html',{'user_count':user_count, 'tq': tq})
