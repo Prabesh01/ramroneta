@@ -132,7 +132,7 @@
       color: #fff;
       text-decoration: none;
       font-weight: bold;
-      border-bottom: 2px solid transparent;
+      border-bottom: 2px solid transpa, Kaskirent;
       padding-bottom: 4px;
       cursor: pointer;
     }
@@ -478,12 +478,16 @@
       <h2>{{house}} Election, {{year}}</h2>
       <ul class="candidate-list">
         {% for c in candidates %}
-        {% if target.proportional %}
-          <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_pr_candidate_detail' year=year party=target.party.id candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="liberal">●</span>{% endif %} {{ c.candidate.name }}<br><span>#{{c.order}}</span></a></li>
+        {% if house == "Local Level" %}
+          <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="/local/{{year}}/candidates?type={{params.type}}&municipality={{params.municipality}}&ward={{params.ward}}&candidate={{c.candidate.id}}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
         {% else %}
-          <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_fptp_candidate_detail' year=year constituency=constituency candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
+          {% if target.proportional %}
+            <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_pr_candidate_detail' year=year party=target.party.id candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="liberal">●</span>{% endif %} {{ c.candidate.name }}<br><span>#{{c.order}}</span></a></li>
+          {% else %}
+            <li><a {% if c.candidate.id == target.candidate.id %} class="active" {% endif %} href="{% url 'hor_fptp_candidate_detail' year=year constituency=constituency candidate_id=c.candidate.id %}">{% if c.candidate.id != target.candidate.id %}<span class="{% if c.party %}liberal{% else %}ndp{% endif %}">●</span>{% endif %} {{ c.candidate.name }}<br><span>{% if c.party %}{{c.party.name}}{% else %}Independent{% endif %}</span></a></li>
+          {%endif%}
         {%endif%}
-          {% endfor %}
+        {% endfor %}
       </ul>
     </aside>
 

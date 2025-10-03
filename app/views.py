@@ -168,4 +168,4 @@ def local_candidates(request, year):
         constituency = ""
         candidate_tag = ""
 
-    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': local_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"Local Level",'election_type':target.local_position.replace('_',' ').title() if target else '','candidate_tag':candidate_tag})
+    return render(request, 'candidate.html', {'year': year, 'constituency': constituency, 'candidates': local_candidates, 'target': target, 'cases': cases, 'kartuts': kartuts, 'case_counts': case_counts, 'total_cases': total_cases, 'other_cases_count': other_cases_count, 'house':"Local Level",'election_type':target.local_position.replace('_',' ').title() if target else '','candidate_tag':candidate_tag,'params':request.GET})
