@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency, Municipality, District
+from .models import Candidate, Case, Kartut, Representative, Party, HoR_Constituency, Province_Constituency, Municipality, District, House
 from django.core.exceptions import ValidationError
 from django import forms
 from django.db.models import Value, CharField, Q
@@ -274,7 +274,15 @@ class RepresentativeAdmin(admin.ModelAdmin):
         """
         Limit constituency choices depending on the user's username
         """
-        if not request.user.is_superuser and not request.user.username.startswith('pr-'):
+        if not request.user.is_superuser:
+            if db_field.name == "house":
+                not_needed=["NATIONAL_ASSEMBLY"]
+                if request.user.username.startswith('pr-'):
+                    not_needed += ["LOCAL_LEVEL"]
+                kwargs['choices'] = [
+                    c for c in House.choices if c[0] not in not_needed
+                ]
+        if not request.user.is_superuser and not request.user.username.startswith('pr-') and not '@' in request.user.username:
             user_prefix = request.user.username.upper()
             if db_field.name == "hor_constituency":
                 kwargs['choices'] = [(None, '---')] + [
@@ -317,6 +325,10 @@ class RepresentativeAdmin(admin.ModelAdmin):
                     field.required = True
         elif not request.user.is_superuser:
             for field_name, field in form.base_fields.items():
+                if '@' in request.user.username:
+                    if field_name == "house":
+                        field.initial="LOCAL_LEVEL"
+                        field.widget = forms.HiddenInput()
                 if field_name in ['proportional','order']:
                     field.widget = forms.HiddenInput()
         return form
