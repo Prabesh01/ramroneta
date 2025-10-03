@@ -552,10 +552,11 @@ fetchData();
             let url = '/local/{{year}}/candidates?';
             
             const [provIdx, distIdx] = districtSelect.value.split('-');
-            const districtId = data[provIdx].districts[distIdx].id;
+            const district = data[provIdx].districts[distIdx];
+            const districtId = district.id;
 
-            const [_, munIdx] = municipalitySelect.value.split('-');
-            const municipalityId = data[provIdx].districts[distIdx].municipalities[munIdx].id;
+            const [_, __, munIdx] = municipalitySelect.value.split('-');
+            const municipalityId = district.municipalities[munIdx].id;
 
             if (isMayorOrDeputy) {
                 url += `municipality=${municipalityId}&type=${encodeURIComponent(position)}`;
